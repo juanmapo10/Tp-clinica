@@ -1,0 +1,239 @@
+:root {
+  --primary-color: #2c3e50;
+  --secondary-color: #3498db;
+  --success-color: #2ecc71;
+  --danger-color: #e74c3c;
+  --warning-color: #f1c40f;
+  --info-color: #3498db;
+  --gray-light: #ecf0f1;
+  --gray-dark: #95a5a6;
+  --white: #ffffff;
+  --shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  --border-radius: 8px;
+}
+
+/* Main container */
+.appointments-container {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+h2 {
+  color: var(--primary-color);
+  margin-bottom: 25px;
+  border-bottom: 2px solid var(--secondary-color);
+  padding-bottom: 10px;
+}
+
+/* Alert messages */
+.alert {
+  padding: 15px;
+  border-radius: var(--border-radius);
+  margin-bottom: 20px;
+}
+
+.alert-danger {
+  background-color: rgba(231, 76, 60, 0.1);
+  border: 1px solid var(--danger-color);
+  color: var(--danger-color);
+}
+
+.alert-info {
+  background-color: rgba(52, 152, 219, 0.1);
+  border: 1px solid var(--info-color);
+  color: var(--info-color);
+  text-align: center;
+  padding: 40px;
+}
+
+/* Loading spinner */
+.loading-spinner {
+  text-align: center;
+  padding: 20px;
+  color: var(--gray-dark);
+}
+
+.loading-spinner::after {
+  content: '';
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 3px solid var(--gray-light);
+  border-top-color: var(--secondary-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-left: 10px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Appointments list */
+.turnos-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.turno-item {
+  background-color: var(--white);
+  border-radius: var(--border-radius);
+  padding: 20px;
+  margin-bottom: 15px;
+  box-shadow: var(--shadow);
+  transition: transform 0.2s ease;
+}
+
+.turno-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.turno-info {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.turno-info span {
+  padding: 8px 12px;
+  border-radius: var(--border-radius);
+  font-size: 14px;
+}
+
+.fecha, .hora {
+  background-color: var(--gray-light);
+  color: var(--primary-color);
+  font-weight: 500;
+}
+
+.especialidad, .especialista {
+  color: var(--secondary-color);
+  font-weight: 500;
+}
+
+.estado {
+  text-transform: capitalize;
+  font-weight: 500;
+  padding: 5px 12px;
+  border-radius: 20px;
+  display: inline-block;
+}
+
+.estado[data-estado="pendiente"] {
+  background-color: rgba(241, 196, 15, 0.2);
+  color: #d35400;
+}
+
+.estado[data-estado="aceptado"] {
+  background-color: rgba(52, 152, 219, 0.2);
+  color: var(--secondary-color);
+}
+
+.estado[data-estado="realizado"] {
+  background-color: rgba(46, 204, 113, 0.2);
+  color: #27ae60;
+}
+
+.estado[data-estado="cancelado"] {
+  background-color: rgba(231, 76, 60, 0.2);
+  color: #c0392b;
+}
+
+.comentario {
+  font-style: italic;
+  color: var(--gray-dark);
+}
+
+/* Buttons and actions */
+.turno-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.btn-primary {
+  background-color: var(--secondary-color);
+  color: var(--white);
+}
+
+.btn-primary:hover {
+  background-color: #2980b9;
+}
+
+.btn-danger {
+  background-color: var(--danger-color);
+  color: var(--white);
+}
+
+.btn-danger:hover {
+  background-color: #c0392b;
+}
+
+.btn-secondary {
+  background-color: var(--gray-dark);
+  color: var(--white);
+}
+
+.btn-secondary:hover {
+  background-color: #7f8c8d;
+}
+
+/* Cancellation form */
+.cancelacion-comentario {
+  margin-top: 15px;
+  padding: 15px;
+  background-color: var(--gray-light);
+  border-radius: var(--border-radius);
+}
+
+.cancelacion-comentario h4 {
+  color: var(--primary-color);
+  margin-bottom: 10px;
+}
+
+.form-control {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid var(--gray-dark);
+  border-radius: var(--border-radius);
+  margin-bottom: 10px;
+  font-family: inherit;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: var(--secondary-color);
+  box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+}
+
+.mt-2 {
+  margin-top: 8px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .turno-info {
+    grid-template-columns: 1fr;
+  }
+  
+  .turno-actions {
+    justify-content: center;
+  }
+  
+  .btn {
+    width: 100%;
+  }
+}

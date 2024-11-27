@@ -1,0 +1,148 @@
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="text-center">Registro de Usuario</h3>
+          <div class="btn-group w-100 mb-3" role="group">
+            <button 
+              [class.active]="tipoUsuario === 'paciente'"
+              (click)="cambiarTipoUsuario('paciente')"
+              class="btn btn-outline-primary">
+              Paciente
+            </button>
+            <button 
+              [class.active]="tipoUsuario === 'especialista'"
+              (click)="cambiarTipoUsuario('especialista')"
+              class="btn btn-outline-primary">
+              Especialista
+            </button>
+          </div>
+        </div>
+        
+        <div class="card-body">
+          <form [formGroup]="registroForm" (ngSubmit)="onSubmit()">
+            <!-- Campos comunes -->
+            <div class="mb-3">
+              <label class="form-label">Nombre</label>
+              <input type="text" formControlName="nombre" class="form-control"
+                     [class.is-invalid]="registroForm.get('nombre')?.invalid && registroForm.get('nombre')?.touched">
+              <div class="invalid-feedback" *ngIf="getErrorMessage('nombre')">
+                {{ getErrorMessage('nombre') }}
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Apellido</label>
+              <input type="text" formControlName="apellido" class="form-control"
+                     [class.is-invalid]="registroForm.get('apellido')?.invalid && registroForm.get('apellido')?.touched">
+              <div class="invalid-feedback" *ngIf="getErrorMessage('apellido')">
+                {{ getErrorMessage('apellido') }}
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Edad</label>
+              <input type="number" formControlName="edad" class="form-control"
+                     [class.is-invalid]="registroForm.get('edad')?.invalid && registroForm.get('edad')?.touched">
+              <div class="invalid-feedback" *ngIf="getErrorMessage('edad')">
+                {{ getErrorMessage('edad') }}
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">DNI</label>
+              <input type="text" formControlName="dni" class="form-control"
+                     [class.is-invalid]="registroForm.get('dni')?.invalid && registroForm.get('dni')?.touched">
+              <div class="invalid-feedback" *ngIf="getErrorMessage('dni')">
+                {{ getErrorMessage('dni') }}
+              </div>
+            </div>
+
+            <!-- Campos específicos de Paciente -->
+            <div class="mb-3" *ngIf="tipoUsuario === 'paciente'">
+              <label class="form-label">Obra Social</label>
+              <input type="text" formControlName="obraSocial" class="form-control"
+                     [class.is-invalid]="registroForm.get('obraSocial')?.invalid && registroForm.get('obraSocial')?.touched">
+              <div class="invalid-feedback" *ngIf="getErrorMessage('obraSocial')">
+                {{ getErrorMessage('obraSocial') }}
+              </div>
+            </div>
+
+            <!-- Campos específicos de Especialista -->
+            <div class="mb-3" *ngIf="tipoUsuario === 'especialista'">
+              <label class="form-label">Especialidad</label>
+              <select formControlName="especialidad" class="form-control"
+                      [class.is-invalid]="registroForm.get('especialidad')?.invalid && registroForm.get('especialidad')?.touched">
+                <option value="">Seleccione una especialidad</option>
+                <option *ngFor="let esp of especialidades$ | async" [value]="esp">
+                  {{esp}}
+                </option>
+              </select>
+              <div class="invalid-feedback" *ngIf="getErrorMessage('especialidad')">
+                {{ getErrorMessage('especialidad') }}
+              </div>
+              
+              <!-- Agregar nueva especialidad -->
+              <div class="input-group mt-2">
+                <input type="text" [(ngModel)]="nuevaEspecialidad" 
+                       [ngModelOptions]="{standalone: true}"
+                       class="form-control" 
+                       placeholder="Nueva especialidad">
+                <button type="button" 
+                        class="btn btn-secondary" 
+                        (click)="agregarNuevaEspecialidad()">
+                  Agregar
+                </button>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Email</label>
+              <input type="email" formControlName="email" class="form-control"
+                     [class.is-invalid]="registroForm.get('email')?.invalid && registroForm.get('email')?.touched">
+              <div class="invalid-feedback" *ngIf="getErrorMessage('email')">
+                {{ getErrorMessage('email') }}
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Contraseña</label>
+              <input type="password" formControlName="password" class="form-control"
+                     [class.is-invalid]="registroForm.get('password')?.invalid && registroForm.get('password')?.touched">
+              <div class="invalid-feedback" *ngIf="getErrorMessage('password')">
+                {{ getErrorMessage('password') }}
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">
+                Imágenes de perfil 
+                ({{tipoUsuario === 'paciente' ? '2 imágenes requeridas' : '1 imagen requerida'}})
+              </label>
+              <input type="file" 
+                     class="form-control" 
+                     (change)="onFileSelected($event)" 
+                     [multiple]="tipoUsuario === 'paciente'"
+                     accept="image/*">
+            </div>
+
+            <button type="submit" 
+                    class="btn btn-primary w-100" 
+                    [disabled]="!registroForm.valid || cargando">
+              {{cargando ? 'Registrando...' : 'Registrar'}}
+            </button>
+
+            <!-- Mensajes de éxito y error -->
+            <div class="mt-3" *ngIf="mensajeExito" class="alert alert-success">
+              {{ mensajeExito }}
+            </div>
+            <div class="mt-3" *ngIf="mensajeError" class="alert alert-danger">
+              {{ mensajeError }}
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

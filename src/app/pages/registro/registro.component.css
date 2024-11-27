@@ -1,0 +1,246 @@
+/* Estilos generales del contenedor */
+.container {
+  padding: 3rem 1.5rem;
+  max-width: 900px;
+  margin: 0 auto;
+  background-color: #f8fbff;
+  min-height: calc(100vh - 60px); /* Ajusta según el alto de tu navbar */
+}
+
+/* Estilos de la tarjeta principal */
+.card {
+  background: white;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+  border-radius: 12px;
+  border: none;
+  overflow: hidden;
+}
+
+.card:hover {
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+}
+
+/* Encabezado de la tarjeta */
+.card-header {
+  background: linear-gradient(135deg, #0057b8 0%, #0068db 100%);
+  border: none;
+  padding: 1.5rem;
+}
+
+.card-header h3 {
+  color: white;
+  font-weight: 600;
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+/* Botones de tipo de usuario */
+.btn-group {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 0.25rem;
+  margin-top: 1rem;
+}
+
+.btn-group .btn {
+  color: white;
+  font-weight: 500;
+  padding: 0.5rem 2rem;
+  border: none;
+  transition: all 0.3s ease;
+}
+
+.btn-group .btn.active {
+  background: white;
+  color: #0057b8;
+  border-radius: 6px;
+}
+
+.btn-group .btn:hover:not(.active) {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Cuerpo del formulario */
+.card-body {
+  padding: 2rem;
+}
+
+/* Campos del formulario */
+.form-label {
+  color: #2c3e50;
+  font-weight: 500;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+}
+
+.form-control {
+  border: 1.5px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+}
+
+.form-control:focus {
+  border-color: #0057b8;
+  box-shadow: 0 0 0 3px rgba(0, 87, 184, 0.1);
+}
+
+/* Estilos para select */
+select.form-control {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%232c3e50' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 1rem;
+  padding-right: 2.5rem;
+}
+
+/* Mensajes de error */
+.invalid-feedback {
+  color: #dc3545;
+  font-size: 0.8rem;
+  margin-top: 0.25rem;
+}
+
+/* Botón de submit */
+.btn-primary {
+  background: linear-gradient(135deg, #0057b8 0%, #0068db 100%);
+  border: none;
+  padding: 0.75rem 2rem;
+  font-weight: 500;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #004a9e 0%, #0057b8 100%);
+  transform: translateY(-1px);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+/* Input de archivos personalizado */
+input[type="file"] {
+  border: 2px dashed #e2e8f0;
+  padding: 1rem;
+  border-radius: 8px;
+  width: 100%;
+  cursor: pointer;
+}
+
+input[type="file"]::file-selector-button {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  color: #2c3e50;
+  margin-right: 1rem;
+  transition: all 0.3s ease;
+}
+
+input[type="file"]::file-selector-button:hover {
+  background: #f1f5f9;
+}
+
+/* Estilos para mensajes de alerta */
+.alert {
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+.alert-success {
+  background-color: #dcfce7;
+  color: #166534;
+}
+
+.alert-danger {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+/* Grupo de input para especialidades */
+.input-group {
+  margin-top: 0.5rem;
+}
+
+.input-group input {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.input-group .btn {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  background: #0057b8;
+  color: white;
+  border: none;
+  padding: 0 1.5rem;
+}
+
+/* Estilos responsive */
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+  }
+  
+  .card-body {
+    padding: 1.5rem;
+  }
+  
+  .card-header {
+    padding: 1.25rem;
+  }
+  
+  .btn-group .btn {
+    padding: 0.5rem 1rem;
+  }
+}
+
+/* Estilos para el spinner de carga */
+.spinner-border {
+  width: 1.2rem;
+  height: 1.2rem;
+  margin-right: 0.5rem;
+  border-width: 0.2em;
+}
+
+/* Ajustes adicionales para hacer el formulario más profesional */
+.form-group + .form-group {
+  margin-top: 1rem;
+}
+
+.mb-3 {
+  margin-bottom: 1.25rem !important;
+}
+
+/* Estilo para campos requeridos */
+.form-label.required::after {
+  content: "*";
+  color: #dc3545;
+  margin-left: 4px;
+}
+
+/* Estilo para el contenedor de imágenes */
+.image-upload-container {
+  background: #f8fafc;
+  border-radius: 8px;
+  padding: 1rem;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.image-upload-container p {
+  color: #64748b;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+}
+
+/* Efecto de hover en campos */
+.form-control:hover {
+  border-color: #cbd5e1;
+}

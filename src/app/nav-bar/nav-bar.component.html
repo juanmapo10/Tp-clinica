@@ -1,0 +1,55 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <div class="container">
+    <a class="navbar-brand" routerLink="/">Clinica</a>
+    
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarContent">
+      <!-- Menú para usuario no autenticado -->
+      <ul class="navbar-nav ms-auto" *ngIf="!(user$ | async)">
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/registro">Registro</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/login">Login</a>
+        </li>
+      </ul>
+
+      <!-- Menú para usuario autenticado -->
+      <ul class="navbar-nav ms-auto" *ngIf="user$ | async as user">
+        <!-- Elementos comunes del menú -->
+        <li class="nav-item">
+          <a class="nav-link">Bienvenido, {{user.email}}</a>
+        </li>
+        
+        <!-- Menú desplegable -->
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown">
+            <i class="bi bi-person-circle"></i>
+          </a>
+          <ul class="dropdown-menu dropdown-menu-end">
+            <li>
+              <a class="dropdown-item"  (click)="redirectToMiPerfil()">
+                <i class="bi bi-calendar3"></i> Mi Perfil
+              </a>
+            </li>
+            <li><hr class="dropdown-divider"></li>
+            <li>
+              <a class="dropdown-item"  (click)="redirectToMisTurnos()">
+                <i class="bi bi-calendar3"></i> Mis Turnos
+              </a>
+            </li>
+            <li><hr class="dropdown-divider"></li>
+            <li>
+              <a class="dropdown-item" href="#" (click)="logout()">
+                <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
+              </a>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>

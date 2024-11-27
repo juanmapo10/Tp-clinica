@@ -1,0 +1,127 @@
+<div class="container mt-5">
+    <div class="row">
+      <!-- Lista de Usuarios -->
+      <div class="col-md-8">
+        <div class="card">
+          <div class="card-header">
+            <h3>Gestión de Usuarios</h3>
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Imagen</th>
+                    <th>Nombre</th>
+                    <th>Email</th>
+                    <th>Tipo</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let usuario of usuarios$ | async">
+                    <td>
+                      <img [src]="usuario.imagenes[0]" 
+                           class="rounded-circle" 
+                           style="width: 50px; height: 50px; object-fit: cover;">
+                    </td>
+                    <td>{{usuario.nombre}} {{usuario.apellido}}</td>
+                    <td>{{usuario.email}}</td>
+                    <td>{{usuario.tipo}}</td>
+                    <td>
+                      <span *ngIf="usuario.tipo === 'especialista'" 
+                            [class]="usuario.aprobado ? 'text-success' : 'text-danger'">
+                        {{usuario.aprobado ? 'Habilitado' : 'Deshabilitado'}}
+                      </span>
+                    </td>
+                    <td>
+                      <button *ngIf="usuario.tipo === 'especialista'"
+                              class="btn btn-sm"
+                              [class.btn-danger]="usuario.aprobado"
+                              [class.btn-success]="!usuario.aprobado"
+                              (click)="toggleAprobacion(usuario)">
+                        {{usuario.aprobado ? 'Deshabilitar' : 'Habilitar'}}
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Formulario de Registro -->
+      <div class="col-md-4">
+        <div class="card">
+          <div class="card-header">
+            <h3>Nuevo Usuario</h3>
+          </div>
+          <div class="card-body">
+            <form [formGroup]="registroForm" (ngSubmit)="onSubmit()">
+              <div class="mb-3">
+                <label class="form-label">Tipo de Usuario</label>
+                <select formControlName="tipo" class="form-control">
+                  <option value="administrador">Administrador</option>
+                  <option value="especialista">Especialista</option>
+                  <option value="paciente">Paciente</option>
+                </select>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Nombre</label>
+                <input type="text" formControlName="nombre" class="form-control">
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Apellido</label>
+                <input type="text" formControlName="apellido" class="form-control">
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Edad</label>
+                <input type="number" formControlName="edad" class="form-control">
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">DNI</label>
+                <input type="text" formControlName="dni" class="form-control">
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Email</label>
+                <input type="email" formControlName="email" class="form-control">
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Contraseña</label>
+                <input type="password" formControlName="password" class="form-control">
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Imagen de Perfil</label>
+                <input type="file" 
+                       class="form-control" 
+                       (change)="onFileSelected($event)"
+                       accept="image/*">
+              </div>
+
+              <button type="submit" 
+                      class="btn btn-primary w-100"
+                      [disabled]="!registroForm.valid || cargando">
+                {{cargando ? 'Registrando...' : 'Registrar Usuario'}}
+              </button>
+
+              <div *ngIf="mensajeExito" class="alert alert-success mt-3">
+                {{mensajeExito}}
+              </div>
+              <div *ngIf="mensajeError" class="alert alert-danger mt-3">
+                {{mensajeError}}
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>

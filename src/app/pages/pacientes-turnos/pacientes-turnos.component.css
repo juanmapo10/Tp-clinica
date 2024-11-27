@@ -1,0 +1,294 @@
+/* Variables globales */
+:root {
+    --primary-color: #2c3e50;
+    --secondary-color: #3498db;
+    --success-color: #2ecc71;
+    --danger-color: #e74c3c;
+    --warning-color: #f1c40f;
+    --gray-light: #ecf0f1;
+    --gray-dark: #95a5a6;
+    --white: #ffffff;
+    --shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    --border-radius: 8px;
+  }
+  
+  /* Contenedor principal */
+  :host {
+    display: block;
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  
+  h2 {
+    color: var(--primary-color);
+    margin-bottom: 25px;
+    border-bottom: 2px solid var(--secondary-color);
+    padding-bottom: 10px;
+  }
+  
+  /* Mensajes de error */
+  .alert-danger {
+    background-color: rgba(231, 76, 60, 0.1);
+    border: 1px solid var(--danger-color);
+    color: var(--danger-color);
+    padding: 15px;
+    border-radius: var(--border-radius);
+    margin-bottom: 20px;
+  }
+  
+  /* Spinner de carga */
+  .loading-spinner {
+    text-align: center;
+    padding: 20px;
+    color: var(--gray-dark);
+  }
+  
+  .loading-spinner::after {
+    content: '';
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid var(--gray-light);
+    border-top-color: var(--secondary-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-left: 10px;
+  }
+  
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+  
+  /* Filtros */
+  .filtros {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 15px;
+    margin-bottom: 25px;
+  }
+  
+  .form-control {
+    padding: 10px 15px;
+    border: 1px solid var(--gray-dark);
+    border-radius: var(--border-radius);
+    font-size: 14px;
+    transition: border-color 0.3s ease;
+  }
+  
+  .form-control:focus {
+    outline: none;
+    border-color: var(--secondary-color);
+    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+  }
+  
+  /* Lista de turnos */
+  .turnos-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .turno-item {
+    background-color: var(--white);
+    border-radius: var(--border-radius);
+    padding: 15px;
+    margin-bottom: 15px;
+    box-shadow: var(--shadow);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: transform 0.2s ease;
+  }
+  
+  .turno-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  }
+  
+  .turno-info {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+    align-items: center;
+  }
+  
+  .turno-info span {
+    padding: 5px 10px;
+    border-radius: var(--border-radius);
+    font-size: 14px;
+  }
+  
+  .fecha {
+    background-color: var(--gray-light);
+    color: var(--primary-color);
+    font-weight: bold;
+  }
+  
+  .especialidad {
+    color: var(--secondary-color);
+    font-weight: 500;
+  }
+  
+  .estado {
+    text-transform: capitalize;
+    font-weight: 500;
+  }
+  
+  .turno-actions {
+    display: flex;
+    gap: 10px;
+  }
+  
+  /* Botones */
+  .btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s ease;
+  }
+  
+  .btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  
+  .btn-primary {
+    background-color: var(--secondary-color);
+    color: var(--white);
+  }
+  
+  .btn-primary:hover:not(:disabled) {
+    background-color: #2980b9;
+  }
+  
+  .btn-success {
+    background-color: var(--success-color);
+    color: var(--white);
+  }
+  
+  .btn-success:hover:not(:disabled) {
+    background-color: #27ae60;
+  }
+  
+  .btn-danger {
+    background-color: var(--danger-color);
+    color: var(--white);
+  }
+  
+  .btn-danger:hover:not(:disabled) {
+    background-color: #c0392b;
+  }
+  
+  /* Mensaje de no turnos */
+  .no-turnos {
+    text-align: center;
+    padding: 40px;
+    background-color: var(--gray-light);
+    border-radius: var(--border-radius);
+    color: var(--gray-dark);
+    font-size: 16px;
+  }
+  
+  /* Formulario para solicitar turno */
+  .solicitar-turno-form {
+    background-color: var(--white);
+    padding: 25px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    margin-top: 20px;
+  }
+  
+  .solicitar-turno-form h3 {
+    color: var(--primary-color);
+    margin-bottom: 20px;
+  }
+  
+  .form-group {
+    margin-bottom: 20px;
+  }
+  
+  .form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--primary-color);
+    font-weight: 500;
+  }
+  
+  select.form-control {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--gray-dark);
+    border-radius: var(--border-radius);
+    background-color: var(--white);
+    cursor: pointer;
+  }
+  
+  select.form-control:focus {
+    outline: none;
+    border-color: var(--secondary-color);
+    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .turno-item {
+      flex-direction: column;
+      gap: 15px;
+    }
+  
+    .turno-info {
+      grid-template-columns: 1fr;
+      text-align: center;
+    }
+  
+    .turno-actions {
+      width: 100%;
+      justify-content: center;
+    }
+  
+    .filtros {
+      grid-template-columns: 1fr;
+    }
+  }
+  
+  /* Animaciones */
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  
+  .solicitar-turno-form {
+    animation: fadeIn 0.3s ease-in-out;
+  }
+  
+  /* Estilos para el estado del turno */
+  .estado {
+    padding: 5px 10px;
+    border-radius: 20px;
+  }
+  
+  .estado[data-estado="pendiente"] {
+    background-color: rgba(241, 196, 15, 0.2);
+    color: #d35400;
+  }
+  
+  .estado[data-estado="realizado"] {
+    background-color: rgba(46, 204, 113, 0.2);
+    color: #27ae60;
+  }
+  
+  .estado[data-estado="cancelado"] {
+    background-color: rgba(231, 76, 60, 0.2);
+    color: #c0392b;
+  }
+  .encuesta {
+    margin-top: 20px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+  }
+  

@@ -1,0 +1,79 @@
+<div *ngIf="currentUser$ | async as currentUser">
+    <h2>Turnos del Paciente</h2>
+  
+    <!-- Mensajes de error -->
+    <div *ngIf="error" class="alert alert-danger">
+      {{ error }}
+    </div>
+  
+    <!-- Estado de carga -->
+    <div *ngIf="cargandoTurnos" class="loading-spinner">
+      Cargando turnos...
+    </div>
+  
+    <!-- Lista de turnos -->
+    <div *ngIf="!cargandoTurnos && turnos.length > 0">
+      <ul class="turnos-list">
+        <li *ngFor="let turno of turnos" class="turno-item">
+          <div class="turno-info">
+            <span class="estado" [attr.data-estado]="turno.estado">
+              Estado: {{ turno.estado }}
+            </span>
+            <span class="fecha">Fecha: {{ turno.fecha | date: 'shortDate' }}</span>
+            <span class="hora">Hora: {{ turno.fecha | date: 'shortTime' }}</span>
+            <span class="especialidad">Especialidad: {{ turno.especialidad }}</span>
+            <span class="especialista">Especialista: {{ turno.especialista }}</span>
+            <span *ngIf="turno.comentario" class="comentario">Comentario: {{ turno.comentario }}</span>
+          </div>
+          
+          <div class="turno-actions">
+            <button 
+              *ngIf="turno.estado === 'pendiente'"
+              (click)="mostrarEncuesta = turno.id"
+              class="btn btn-danger">
+              Cancelar
+            </button>
+            <button 
+              *ngIf="turno.estado === 'pendiente'"
+              (click)="aceptarTurno(turno.id)"
+              class="btn">
+              Aceptar
+            </button>
+          </div>
+          <button 
+              *ngIf="turno.estado === 'aceptado'"
+              (click)="relizarTurno(turno.id)"
+              class="btn">
+              Realizado
+            </button>
+  
+          <!-- Formulario para agregar comentario de cancelación -->
+          <div *ngIf="mostrarEncuesta === turno.id" class="cancelacion-comentario">
+            <h4>Motivo de la cancelación</h4>
+            <textarea 
+              [(ngModel)]="comentarioCancelacion"
+              rows="3"
+              placeholder="Escribe aquí tu motivo para cancelar el turno"
+              class="form-control">
+            </textarea>
+            <button 
+              (click)="confirmarCancelacion(turno.id)"
+              class="btn btn-primary mt-2">
+              Enviar Comentario y Cancelar Turno
+            </button>
+            <button 
+              (click)="mostrarEncuesta = null"
+              class="btn btn-secondary mt-2">
+              Cancelar
+            </button>
+          </div>
+        </li>
+      </ul>
+    </div>
+    
+    <!-- Mensaje cuando no hay turnos -->
+    <div *ngIf="!cargandoTurnos && turnos.length === 0" class="alert alert-info">
+      No tienes turnos pendientes.
+    </div>
+  </div>
+  
