@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { AuthService } from '../../services/auth.service';
+import { AuthService, Usuario } from '../../services/auth.service';
 import { Observable } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { emailVerified } from '@angular/fire/auth-guard';
@@ -26,6 +26,8 @@ export class RegistroComponent implements OnInit {
   cargando = false;
   mensajeExito: string = '';
   mensajeError: string = '';
+  diasSemana = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'];
+  horarios = Array.from({ length: 10 }, (_, i) => `${8 + i}:00`);
   
   constructor(
     private fb: FormBuilder,
@@ -35,9 +37,7 @@ export class RegistroComponent implements OnInit {
     this.registroForm = this.crearFormularioPaciente();
     this.especialidades$ = this.authService.getEspecialidades();
   }
-
   ngOnInit() {}
-
   private crearFormularioPaciente(): FormGroup {
     return this.fb.group({
       nombre: ['', [Validators.required, Validators.minLength(2)]],
@@ -49,20 +49,20 @@ export class RegistroComponent implements OnInit {
       password: ['', [Validators.required, Validators.minLength(6)]],
     });
   }
-
   private crearFormularioEspecialista(): FormGroup {
     return this.fb.group({
       nombre: ['', [Validators.required, Validators.minLength(2)]],
       apellido: ['', [Validators.required, Validators.minLength(2)]],
       edad: ['', [Validators.required, Validators.min(0), Validators.max(120)]],
       dni: ['', [Validators.required, Validators.pattern('^[0-9]{8}$')]],
-      especialidad: ['', Validators.required],
+      especialidades: [[], Validators.required],
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]],
-      cuentaVerificado : false
+      cuentaVerificado: false,
+      dias: [[], Validators.required], 
+      horarios: [[], Validators.required], 
     });
   }
-
   cambiarTipoUsuario(tipo: 'paciente' | 'especialista') {
     this.tipoUsuario = tipo;
     this.registroForm = tipo === 'paciente' ? 
@@ -72,7 +72,18 @@ export class RegistroComponent implements OnInit {
     this.mensajeError = '';
     this.mensajeExito = '';
   }
-
+  toggleCheckboxSelection(value: string, controlName: string): void {
+    const control = this.registroForm.get(controlName);
+    if (control) {
+      const currentValues = control.value || [];
+      const updatedValues = currentValues.includes(value)
+        ? currentValues.filter((item: string) => item !== value)
+        : [...currentValues, value];
+      
+      control.setValue(updatedValues);
+      control.markAsDirty(); 
+    }
+  }
   onFileSelected(event: any) {
     const files = event.target.files;
     if (files) {
@@ -88,7 +99,6 @@ export class RegistroComponent implements OnInit {
       }
     }
   }
-
   async agregarNuevaEspecialidad() {
     if (this.nuevaEspecialidad.trim()) {
       try {
@@ -102,7 +112,6 @@ export class RegistroComponent implements OnInit {
       }
     }
   }
-
   getErrorMessage(controlName: string): string {
     const control = this.registroForm.get(controlName);
     if (control?.errors && control.touched) {
@@ -115,7 +124,6 @@ export class RegistroComponent implements OnInit {
     }
     return '';
   }
-
   async onSubmit() {
     if (this.registroForm.valid && this.validarImagenes()) {
       this.cargando = true;
@@ -123,15 +131,26 @@ export class RegistroComponent implements OnInit {
       this.mensajeExito = '';
       
       try {
-        const userData = {
+        const userData: Usuario = {
           ...this.registroForm.value,
-          tipo: this.tipoUsuario
+          tipo: this.tipoUsuario,
         };
+        
+        // Para especialistas, pasar días y horarios
+        const diasDisponibles = this.tipoUsuario === 'especialista' 
+          ? this.registroForm.get('dias')?.value 
+          : undefined;
+        
+        const horariosDisponibles = this.tipoUsuario === 'especialista'
+          ? this.registroForm.get('horarios')?.value
+          : undefined;
         
         await this.authService.registrarUsuario(
           userData,
           this.registroForm.get('password')?.value,
-          this.imagenes
+          this.imagenes,
+          diasDisponibles,
+          horariosDisponibles
         );
         
         this.mensajeExito = 'Registro exitoso';

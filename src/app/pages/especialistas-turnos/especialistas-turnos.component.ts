@@ -13,17 +13,25 @@ import { FormsModule } from '@angular/forms';
   styleUrl: './especialistas-turnos.component.css'
 })
 export class EspecialistasTurnosComponent implements OnInit, OnDestroy {
+  currentUser$ = new BehaviorSubject<Usuario | null>(null);
+  
   turnos: Turno[] = [];
+  cargandoTurnos: boolean = false;
+  error: string | null = null;
   horariosDisponibles: Date[] = [];
+
   especialidadSeleccionada: string = '';
   especialistaSeleccionado: string = '';
   horarioSeleccionado: Date | null = null;
+  filtroEspecialidad: string = '';
+  filtroEspecialista: string = '';
+
   mostrarEncuesta: string | null = null;
   comentarioCancelacion: string = '';
-  currentUser$ = new BehaviorSubject<Usuario | null>(null);
+  mostrarDevolucion: string | null = null;
+  comentarioDevolucion: string = '';
+
   private subscriptions: Subscription = new Subscription();
-  cargandoTurnos: boolean = false;
-  error: string | null = null;
 
   constructor(
     private turnoService: TurnoService,
@@ -124,6 +132,18 @@ export class EspecialistasTurnosComponent implements OnInit, OnDestroy {
     }
   }
 
+  filtrarTurnos(): Turno[] {
+    if (!this.turnos.length) return [];
+    
+    return this.turnos.filter(turno => {
+      const matchEspecialidad = !this.filtroEspecialidad || 
+        turno.especialidad.toLowerCase().includes(this.filtroEspecialidad.toLowerCase());
+      const matchEspecialista = !this.filtroEspecialista || 
+        turno.especialista.toLowerCase().includes(this.filtroEspecialista.toLowerCase());
+      return matchEspecialidad && matchEspecialista;
+    });
+  }
+
   private ordenarTurnos(turnos: Turno[]): Turno[] {
     return turnos.sort((a, b) => b.fecha.getTime() - a.fecha.getTime());
   }
@@ -165,14 +185,41 @@ export class EspecialistasTurnosComponent implements OnInit, OnDestroy {
     await this.cargarTurnos();
   }
 
-  async relizarTurno(turnoId: string)
-  {
+  async realizarTurno(turnoId: string) {
     if (!turnoId) {
       console.error('ID de turno no válido');
       return;
     }
-    this.turnoService.actualizarEstadoTurno(turnoId,'realizado');
-    await this.cargarTurnos();
+    
+    // Show devolution dialog
+    this.mostrarDevolucion = turnoId;
+  }
+  
+  // New method to confirm and finalize the turn with a return
+  async confirmarRealizacionTurno() {
+    if (!this.mostrarDevolucion) return;
+  
+    if (this.comentarioDevolucion.trim()) {
+      try {
+        // Update turn status to 'realizado'
+        await this.turnoService.actualizarEstadoTurno(this.mostrarDevolucion, 'realizado');
+        
+        // Add devolution comment
+        await this.turnoService.agregarDevolucionnn(this.mostrarDevolucion, this.comentarioDevolucion);
+        
+        // Reload turns
+        await this.cargarTurnos();
+        
+        // Reset dialog
+        this.mostrarDevolucion = null;
+        this.comentarioDevolucion = '';
+      } catch (error) {
+        console.error('Error al finalizar turno:', error);
+        this.error = 'Error al finalizar el turno';
+      }
+    } else {
+      this.error = 'Por favor, ingresa una devolución para finalizar el turno.';
+    }
   }
 
 }

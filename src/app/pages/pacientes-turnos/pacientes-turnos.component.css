@@ -291,4 +291,208 @@
     border-radius: 5px;
     background-color: #f9f9f9;
   }
-  
+  .specialist-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  .specialist-card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  }
+  .specialist-avatar {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+  }
+  .cursor-pointer {
+    cursor: pointer;
+  }
+/* Enhanced Turnos List Styles */
+.turnos-list {
+  display: grid;
+  gap: 20px;
+  padding: 0;
+  margin: 0;
+}
+
+.turno-item {
+  background-color: var(--white);
+  border-radius: 12px;
+  padding: 25px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(52, 152, 219, 0.1);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 20px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.turno-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 5px;
+  height: 100%;
+  background-color: var(--secondary-color);
+  transition: width 0.3s ease;
+}
+
+.turno-item:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+}
+
+.turno-item:hover::before {
+  width: 8px;
+}
+
+.turno-info {
+  flex-grow: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  align-items: center;
+  min-width: 250px;
+}
+
+.turno-info span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  background-color: rgba(52, 152, 219, 0.05);
+  color: var(--primary-color);
+}
+
+.turno-info span::before {
+  content: '';
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.turno-info .estado {
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.turno-info .estado[data-estado="pendiente"]::before {
+  background-color: #f39c12;
+}
+
+.turno-info .estado[data-estado="realizado"]::before {
+  background-color: #2ecc71;
+}
+
+.turno-info .estado[data-estado="cancelado"]::before {
+  background-color: #e74c3c;
+}
+
+.turno-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-left: auto;
+}
+
+.turno-actions .btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .turno-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .turno-info {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .turno-actions {
+    width: 100%;
+    justify-content: center;
+    margin-left: 0;
+    margin-top: 15px;
+  }
+}
+
+/* Animations */
+@keyframes slideIn {
+  from { 
+    opacity: 0; 
+    transform: translateY(20px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0); 
+  }
+}
+
+.turnos-list .turno-item {
+  animation: slideIn 0.5s ease forwards;
+  opacity: 0;
+  animation-delay: calc(var(--i, 0) * 0.1s);
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-dialog {
+  background-color: white;
+  border-radius: var(--border-radius);
+  width: 500px;
+  max-width: 90%;
+  padding: 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--gray-light);
+  padding-bottom: 15px;
+  margin-bottom: 15px;
+}
+
+.modal-body {
+  margin-bottom: 15px;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.review-text {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+

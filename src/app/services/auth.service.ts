@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Auth, createUserWithEmailAndPassword, onAuthStateChanged, sendEmailVerification, signInWithEmailAndPassword, signOut, User } from '@angular/fire/auth';
-import { Firestore, addDoc, collection, getDocs, doc, setDoc, getDoc } from '@angular/fire/firestore';
+import { Firestore, addDoc, collection, getDocs, doc, setDoc, getDoc, where, query } from '@angular/fire/firestore';
 import { Storage, ref, uploadBytes, getDownloadURL } from '@angular/fire/storage';
 import { Router } from '@angular/router';
 import { BehaviorSubject, Observable, from } from 'rxjs';
@@ -14,11 +14,19 @@ export interface Usuario {
   email: string;
   tipo: 'paciente' | 'especialista' | 'administrador';
   obraSocial?: string;
-  especialidad?: string;
+  especialidades?: string[];
   imagenes: string[];
   aprobado?: boolean;
-  uid?: string; 
+  uid?: string;
+  dias? : string[];
+  horarios? : string[];
 }
+export interface Horarios {
+  especialistaUid: string;
+  diasDisponibles: string[];
+  horariosDisponibles: Date[];
+}
+
 
 @Injectable({
   providedIn: 'root'
@@ -50,11 +58,9 @@ export class AuthService {
         const imagen = imagenes[i];
         const filePath = `usuarios/${userId}/perfil_${i}`;
         const storageRef = ref(this.storage, filePath);
-        
-        // Subir imagen
+
         await uploadBytes(storageRef, imagen);
-        
-        // Obtener URL
+
         const url = await getDownloadURL(storageRef);
         urls.push(url);
       }
@@ -88,9 +94,8 @@ export class AuthService {
     });
   }
 
-  async registrarUsuario(usuario: Usuario, password: string, imagenes: File[]): Promise<void> {
+  async registrarUsuario(usuario: Usuario, password: string, imagenes: File[], diasDisponibles?: string[], horariosDisponibles?: string[]): Promise<void> {
     try {
-      // Crear usuario en Authentication
       const userCredential = await createUserWithEmailAndPassword(this.auth, usuario.email, password);
       
       if (!userCredential.user) throw new Error('No se pudo crear el usuario');
@@ -108,8 +113,38 @@ export class AuthService {
         emailVerificado: false
       });
 
+      if (usuario.tipo === 'especialista' && diasDisponibles && horariosDisponibles) {
+        console.log('entro')
+        const horariosRef = collection(this.firestore, 'horarios');
+        await addDoc(horariosRef, {
+          especialistaUid: userCredential.user.uid,
+          diasDisponibles,
+          horariosDisponibles
+        });
+      }
+
     } catch (error) {
       console.error('Error en el registro:', error);
+      throw error;
+    }
+  }
+
+  async getHorariosEspecialista(especialistaUid: string): Promise<Date[]> {
+    try {
+      const horariosRef = collection(this.firestore, 'horarios');
+      const q = query(horariosRef, where('especialistaUid', '==', especialistaUid));
+      
+      const querySnapshot = await getDocs(q);
+      
+      if (!querySnapshot.empty) {
+        const doc = querySnapshot.docs[0];
+        console.log(doc.data()['horariosDisponibles'].map((horario: string) => new Date(horario)));
+        return doc.data()['horariosDisponibles'].map((horario: string) => new Date(horario));
+      }
+      
+      return [];
+    } catch (error) {
+      console.error('Error al obtener horarios:', error);
       throw error;
     }
   }

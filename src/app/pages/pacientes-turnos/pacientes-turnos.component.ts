@@ -5,6 +5,8 @@ import { Turno, TurnoService } from '../../services/turno.service';
 import { AuthService, Usuario } from '../../services/auth.service';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { take } from 'rxjs/operators';
+import { format } from 'date-fns';
+import { id } from 'date-fns/locale';
 
 @Component({
   selector: 'app-pacientes-turnos',
@@ -14,20 +16,36 @@ import { take } from 'rxjs/operators';
   styleUrls: ['./pacientes-turnos.component.css']
 })
 export class PacientesTurnosComponent implements OnInit, OnDestroy {
-  turnos: Turno[] = [];
-  filtroEspecialidad: string = '';
-  filtroEspecialista: string = '';
-  mostrarSolicitarTurno: boolean = false;
+  currentUser$ = new BehaviorSubject<Usuario | null>(null);
+  error: string | null = null;
+  successMessage: string | null = null;
+  private subscriptions: Subscription = new Subscription();
+  
   especialidades: string[] = [];
   especialistas: Usuario[] = [];
-  horariosDisponibles: Date[] = [];
+  especialistaSeleccionado: Usuario | null = null;
+  especialidadesDelEspecialista: string[] = [];
+  
+  cargandoTurnos: boolean = true;
+  mostrarSolicitarTurno: boolean = false;
   especialidadSeleccionada: string = '';
-  especialistaSeleccionado: string = '';
-  horarioSeleccionado: Date | null = null;
+  
+  fechasDisponibles: Date[] = [];
+  horariosDisponibles: string[] = [];
+  fechaSeleccionada: Date | null = null;
+  horarioSeleccionado: string | null = null;
+
+  turnos: Turno[] = [];
+  filtroEspecialidad: string = '';
+  filtroPaciente: string = '';
   mostrarEncuesta: string | null = null;
   comentarioCancelacion: string = '';
   calificacionSeleccionada: number | null = null;
-
+  dialogoResena: Turno | null = null;
+  textoResena: string = '';
+  modoLecturaResena: boolean = false;
+  
+  
   opcionesEncuesta = [
     { valor: 1, etiqueta: 'Malo' },
     { valor: 2, etiqueta: 'Regular' },
@@ -36,19 +54,14 @@ export class PacientesTurnosComponent implements OnInit, OnDestroy {
     { valor: 5, etiqueta: 'Excelente' }
   ];
 
-  currentUser$ = new BehaviorSubject<Usuario | null>(null);
-  private subscriptions: Subscription = new Subscription();
-  cargandoTurnos: boolean = false;
-  error: string | null = null;
-
   constructor(
     private turnoService: TurnoService,
     private authService: AuthService
   ) {}
 
   ngOnInit() {
-    console.log('Iniciando PacientesTurnosComponent');
     this.inicializarComponente();
+    this.cargarEspecialistas();
   }
 
   ngOnDestroy() {
@@ -57,12 +70,9 @@ export class PacientesTurnosComponent implements OnInit, OnDestroy {
 
   private inicializarComponente() {
     const authSub = this.authService.currentUser$.subscribe(async user => {
-      console.log('Estado de autenticación actualizado:', user?.email);
-      
       if (user) {
         try {
           const usauriotipo = await this.authService.getCurrentUserType();
-          console.log('Tipo de usuario:', usauriotipo);
           
           if (usauriotipo === 'paciente') {
             const currentUser = {
@@ -70,46 +80,189 @@ export class PacientesTurnosComponent implements OnInit, OnDestroy {
               email: user.email,
               tipo: usauriotipo
             } as Usuario;
-
             this.currentUser$.next(currentUser);
-            await this.cargarDatosIniciales();
+            this.cargarDatosIniciales();
           } else {
-            console.warn('Usuario no es paciente:', usauriotipo);
             this.error = 'Acceso no autorizado: Usuario no es paciente';
           }
         } catch (error) {
-          console.error('Error al obtener tipo de usuario:', error);
           this.error = 'Error al cargar información de usuario';
         }
       } else {
-        console.log('No hay usuario autenticado');
         this.currentUser$.next(null);
-        this.resetearDatos();
       }
     });
 
     this.subscriptions.add(authSub);
   }
 
+  cargarEspecialistas() {
+    const especialistasub = this.turnoService.getEspecialistas()
+    .pipe(take(1))
+    .subscribe(
+      especialistas => {
+        this.especialistas = especialistas;
+      },
+      error => {
+        this.error = 'Error al cargar especialistas';
+      }
+    );
+    
+    this.subscriptions.add(especialistasub); 
+  }
+
+  seleccionarEspecialista(especialista: Usuario) {
+    // Reset related fields when changing specialist
+    this.especialistaSeleccionado = especialista;
+    this.especialidadSeleccionada = '';
+    this.fechaSeleccionada = null;
+    this.horarioSeleccionado = null;
+    this.fechasDisponibles = [];
+    this.horariosDisponibles = [];
+  }
+
+  seleccionarEspecialidad(especialidad: string) {
+    this.especialidadSeleccionada = especialidad;
+    this.generarFechasDisponibles();
+  }
+
+  generarFechasDisponibles() {
+    if (!this.especialistaSeleccionado) return;
+
+    const dayMapping: { [key: string]: number } = {
+      'lunes': 1,
+      'martes': 2,
+      'miércoles': 3,
+      'jueves': 4,
+      'viernes': 5,
+      'sábado': 6,
+      'domingo': 0
+    };
+  
+    this.fechasDisponibles = [];
+    const today = new Date();
+  
+    for (let i = 0; i < 15; i++) {
+      const fecha = new Date(today);
+
+      fecha.setDate(today.getDate() + i);
+      const dayName = fecha.toLocaleDateString('es-AR', { weekday: 'long' }).toLowerCase();
+      const diasTrabajo = this.especialistaSeleccionado.dias || [];
+      const isAvailable = diasTrabajo.some(dia => dia.toLowerCase() === dayName);
+  
+      if (isAvailable) {
+        this.fechasDisponibles.push(fecha);
+      }
+    }
+  }
+
+  async seleccionarFecha(fecha: Date) {
+    if (!this.especialistaSeleccionado) return;
+    this.fechaSeleccionada = fecha;
+    this.horarioSeleccionado = null; // Reset horario when selecting a new date
+    try {
+     this.horariosDisponibles = this.especialistaSeleccionado.horarios || [];
+    } catch (error) {
+      this.error = 'Error al cargar horarios disponibles';
+    }
+  }
+
+  formatearFecha(fecha: Date): string {
+    return fecha.toLocaleDateString('es-AR', { 
+      day: '2-digit', 
+      month: '2-digit', 
+      year: 'numeric' 
+    });
+  }
+
+  seleccionarHorario(horario: string) {
+    this.horarioSeleccionado = horario;
+    console.log(this.horarioSeleccionado);
+  }
+
+  async confirmarTurno() {
+    if (!this.validarDatosTurno()) {
+      this.error = 'Por favor complete todos los campos necesarios.';
+      return;
+    }
+    const currentUser = await this.currentUser$.pipe(take(1)).toPromise();
+    if (!currentUser) {
+      this.error = 'Usuario no autenticado';
+      return;
+    }
+    try {
+      if (!this.fechaSeleccionada || !this.horarioSeleccionado) {
+        this.error = 'Debe seleccionar fecha y hora';
+        return;
+      }
+
+      const [hours, minutes] = this.horarioSeleccionado.split(':').map(Number);
+      const fechaHoraTurno = new Date(this.fechaSeleccionada);
+      fechaHoraTurno.setHours(hours, minutes, 0, 0);
+
+      const turno: Omit<Turno, 'id'> = {
+        pacienteId: currentUser.uid,
+        especialistaId: this.especialistaSeleccionado!.uid,
+        especialista: this.especialistaSeleccionado!.nombre,
+        especialidad: this.especialidadSeleccionada,
+        fecha: fechaHoraTurno,
+        estado: 'pendiente',
+        paciente: currentUser.email || ''
+      };
+
+      const turnoId = await this.turnoService.crearTurno(turno);
+      console.log("turno creado exitosamente, id : ", turnoId)
+      this.resetearDatos();
+      setTimeout(() => {
+        this.successMessage = null;
+      }, 3000);
+
+    } catch (error) {
+      console.error('Error creating turno:', error);
+      this.error = 'Error al solicitar el turno. Intente nuevamente.';
+    }
+  }
+
+  getSpecialtyImage(specialty: string): string {
+    const specialtyImages: { [key: string]: string } = {
+      'traumatologo': 'traumatologo.svg',
+      'enfermero': 'enfermero.svg',
+      'cirujano': 'cirujano.svg',
+      'anestesista': 'anestesista.svg',
+    };
+  
+    return specialtyImages[specialty] || "default.svg";
+  }
+
+   async resetearDatos() {
+    this.especialistaSeleccionado = null;
+    this.especialidadSeleccionada = '';
+    this.fechaSeleccionada = null;
+    this.horarioSeleccionado = null;
+    this.fechasDisponibles = [];
+    this.horariosDisponibles = [];
+    this.mostrarSolicitarTurno = false;
+  }
+
+  public validarDatosTurno(): boolean {
+    return !!(
+      this.horarioSeleccionado &&
+      this.especialidadSeleccionada &&
+      this.especialistaSeleccionado &&
+      this.fechaSeleccionada
+    );
+  }
+
+
   private async cargarDatosIniciales() {
     try {
       await Promise.all([
         this.cargarTurnos(),
-        this.cargarEspecialidades()
       ]);
     } catch (error) {
       console.error('Error al cargar datos iniciales:', error);
       this.error = 'Error al cargar datos iniciales';
     }
-  }
-
-  private resetearDatos() {
-    this.turnos = [];
-    this.especialidades = [];
-    this.especialistas = [];
-    this.horariosDisponibles = [];
-    this.mostrarSolicitarTurno = false;
-    this.error = null;
   }
 
   async cargarTurnos() {
@@ -156,10 +309,20 @@ export class PacientesTurnosComponent implements OnInit, OnDestroy {
     return this.turnos.filter(turno => {
       const matchEspecialidad = !this.filtroEspecialidad || 
         turno.especialidad.toLowerCase().includes(this.filtroEspecialidad.toLowerCase());
-      const matchEspecialista = !this.filtroEspecialista || 
-        turno.especialista.toLowerCase().includes(this.filtroEspecialista.toLowerCase());
+      const matchEspecialista = !this.filtroPaciente || 
+        turno.paciente?.toLowerCase().includes(this.filtroPaciente.toLowerCase());
       return matchEspecialidad && matchEspecialista;
     });
+  }
+
+  async confirmarCancelacion(turnoId: string) {
+    if (this.comentarioCancelacion.trim()) {
+      await this.cancelarTurno(turnoId, this.comentarioCancelacion);
+      this.mostrarEncuesta = null;  
+      this.comentarioCancelacion = ''; 
+    } else {
+      this.error = 'Por favor, ingresa un motivo para cancelar el turno.';
+    }
   }
 
   async cancelarTurno(turnoId: string, comentario: string) {
@@ -177,30 +340,6 @@ export class PacientesTurnosComponent implements OnInit, OnDestroy {
       this.error = 'Error al cancelar el turno';
     }
   }
-  
-  async confirmarCancelacion(turnoId: string) {
-    if (this.comentarioCancelacion.trim()) {
-      await this.cancelarTurno(turnoId, this.comentarioCancelacion);
-      this.mostrarEncuesta = null;  
-      this.comentarioCancelacion = ''; 
-    } else {
-      this.error = 'Por favor, ingresa un motivo para cancelar el turno.';
-    }
-  }
-  
-
-  async calificarAtencion(turnoId: string, calificacion: string) {
-    if (!turnoId) return;
-
-    try {
-      await this.turnoService.agregarCalificacion(turnoId, calificacion);
-      console.log('Calificación agregada exitosamente');
-      await this.cargarTurnos();
-    } catch (error) {
-      console.error('Error al calificar atención:', error);
-      this.error = 'Error al calificar la atención';
-    }
-  }
 
   async completarEncuesta(turnoId: string, encuesta: any) {
     if (!turnoId || !encuesta.satisfaction) return;
@@ -215,118 +354,51 @@ export class PacientesTurnosComponent implements OnInit, OnDestroy {
     }
   }
 
-  cargarEspecialidades() {
-    const especialidadesSub = this.authService.getEspecialidades()
-      .pipe(take(1))
-      .subscribe(
-        especialidades => {
-          console.log('Especialidades cargadas:', especialidades);
-          this.especialidades = especialidades;
-        },
-        error => {
-          console.error('Error al cargar especialidades:', error);
-          this.error = 'Error al cargar especialidades';
-        }
-      );
-
-    this.subscriptions.add(especialidadesSub);
+  abrirDialogoResena(turno: Turno) {
+    this.dialogoResena = turno;
+    this.textoResena = ''; // Reset review text
+    this.modoLecturaResena = false;
   }
-
-  cargarEspecialistas() {
-    if (!this.especialidadSeleccionada) {
-      console.warn('No hay especialidad seleccionada');
-      return;
-    }
-
-    const especialistasSub = this.turnoService
-      .getEspecialistasPorEspecialidad(this.especialidadSeleccionada)
-      .pipe(take(1))
-      .subscribe(
-        especialistas => {
-          console.log('Especialistas cargados:', especialistas);
-          this.especialistas = especialistas;
-          this.especialistaSeleccionado = '';
-          this.horariosDisponibles = [];
-        },
-        error => {
-          console.error('Error al cargar especialistas:', error);
-          this.error = 'Error al cargar especialistas';
-        }
-      );
-
-    this.subscriptions.add(especialistasSub);
-  }
-
-  cargarHorariosDisponibles() {
-    const fechaBase = new Date('2024-11-06');
-    this.horariosDisponibles = [
-      new Date(fechaBase.setHours(9, 0, 0)),
-      new Date(fechaBase.setHours(10, 0, 0)),
-      new Date(fechaBase.setHours(11, 0, 0)),
-      new Date(fechaBase.setHours(12, 0, 0)),
-      new Date(fechaBase.setHours(14, 0, 0)),
-      new Date(fechaBase.setHours(15, 0, 0)),
-      new Date(fechaBase.setHours(16, 0, 0)),
-    ];
-    console.log('Horarios disponibles cargados:', this.horariosDisponibles);
-  }
-
-  async confirmarTurno() {
-    if (!this.validarDatosTurno()) {
-      console.warn('Datos de turno incompletos');
-      return;
-    }
-
-    const currentUser = this.currentUser$.value;
-    if (!currentUser?.uid) {
-      console.error('No hay usuario actual');
-      return;
-    }
-
-    const especialistaSeleccionado = this.especialistas.find(
-      e => e.uid === this.especialistaSeleccionado
-    );
-
-    if (!especialistaSeleccionado) {
-      console.error('Especialista no encontrado');
-      return;
-    }
-
-    try {
-      const turno = {
-        pacienteId: currentUser.uid,
-        especialistaId: this.especialistaSeleccionado,
-        especialista: `${especialistaSeleccionado.nombre} ${especialistaSeleccionado.apellido}`,
-        especialidad: this.especialidadSeleccionada,
-        fecha: this.horarioSeleccionado!,
-        estado: 'pendiente' as const
-      };
-
-      await this.turnoService.crearTurno(turno);
-      console.log('Turno creado exitosamente');
-      this.resetearFormularioTurno();
-      await this.cargarTurnos();
-    } catch (error) {
-      console.error('Error al crear el turno:', error);
-      this.error = 'Error al crear el turno';
-    }
-  }
-
-  public validarDatosTurno(): boolean {
-    return !!(
-      this.horarioSeleccionado &&
-      this.especialidadSeleccionada &&
-      this.especialistaSeleccionado
-    );
-  }
-
-  private resetearFormularioTurno() {
-    this.mostrarSolicitarTurno = false;
-    this.especialidadSeleccionada = '';
-    this.especialistaSeleccionado = '';
-    this.horarioSeleccionado = null;
-    this.horariosDisponibles = [];
-  }
-
   
+  verResena(turno: Turno) {
+    this.dialogoResena = turno;
+    this.textoResena = turno.resena || '';
+    this.modoLecturaResena = true;
+  }
+  
+  async guardarResena() {
+    if (!this.dialogoResena || !this.textoResena.trim()) {
+      this.error = 'Por favor, ingrese un texto para la reseña';
+      return;
+    }
+  
+    try {
+      await this.turnoService.agregarResena(this.dialogoResena.id, this.textoResena.trim());
+      console.log('Reseña guardada exitosamente');
+      
+      // Reload turnos to reflect the new review
+      await this.cargarTurnos();
+      
+      // Reset dialog
+      this.dialogoResena = null;
+      this.textoResena = '';
+      this.modoLecturaResena = false;
+      
+      // Show success message
+      this.successMessage = 'Reseña guardada correctamente';
+      setTimeout(() => {
+        this.successMessage = null;
+      }, 3000);
+    } catch (error) {
+      console.error('Error al guardar reseña:', error);
+      this.error = 'Error al guardar la reseña';
+    }
+  }
+  
+  cerrarDialogoResena() {
+    this.dialogoResena = null;
+    this.textoResena = '';
+    this.modoLecturaResena = false;
+  }
+
 }

@@ -63,7 +63,7 @@
             <div class="mb-3" *ngIf="tipoUsuario === 'paciente'">
               <label class="form-label">Obra Social</label>
               <input type="text" formControlName="obraSocial" class="form-control"
-                     [class.is-invalid]="registroForm.get('obraSocial')?.invalid && registroForm.get('obraSocial')?.touched">
+                    [class.is-invalid]="registroForm.get('obraSocial')?.invalid && registroForm.get('obraSocial')?.touched">
               <div class="invalid-feedback" *ngIf="getErrorMessage('obraSocial')">
                 {{ getErrorMessage('obraSocial') }}
               </div>
@@ -71,16 +71,19 @@
 
             <!-- Campos específicos de Especialista -->
             <div class="mb-3" *ngIf="tipoUsuario === 'especialista'">
-              <label class="form-label">Especialidad</label>
-              <select formControlName="especialidad" class="form-control"
-                      [class.is-invalid]="registroForm.get('especialidad')?.invalid && registroForm.get('especialidad')?.touched">
-                <option value="">Seleccione una especialidad</option>
-                <option *ngFor="let esp of especialidades$ | async" [value]="esp">
-                  {{esp}}
-                </option>
-              </select>
-              <div class="invalid-feedback" *ngIf="getErrorMessage('especialidad')">
-                {{ getErrorMessage('especialidad') }}
+              <label class="form-label">Especialidades</label>
+              <div class="form-check" *ngFor="let esp of especialidades$ | async">
+                <input
+                  type="checkbox"
+                  class="form-check-input"
+                  [id]="'esp-' + esp"
+                  [value]="esp"
+                  [checked]="registroForm.get('especialidades')?.value.includes(esp)"
+                  (change)="toggleCheckboxSelection(esp, 'especialidades')"
+                />
+                <label class="form-check-label" [for]="'esp-' + esp">
+                  {{ esp }}
+                </label>
               </div>
               
               <!-- Agregar nueva especialidad -->
@@ -95,6 +98,37 @@
                   Agregar
                 </button>
               </div>
+
+  <label class="form-label">Seleccione los días disponibles</label>
+  <div *ngFor="let dia of diasSemana" class="form-check">
+    <input
+      type="checkbox"
+      class="form-check-input"
+      [id]="'dia-' + dia"
+      [value]="dia"
+      [checked]="registroForm.get('dias')?.value.includes(dia)"
+      (change)="toggleCheckboxSelection(dia, 'dias')"
+    />
+    <label class="form-check-label" [for]="'dia-' + dia">
+      {{ dia }}
+    </label>
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Seleccione los horarios disponibles</label>
+    <div *ngFor="let horario of horarios" class="form-check">
+      <input
+        type="checkbox"
+        class="form-check-input"
+        [id]="'horario-' + horario"
+        [value]="horario"
+        [checked]="registroForm.get('horarios')?.value.includes(horario)"
+        (change)="toggleCheckboxSelection(horario, 'horarios')"
+      />
+      <label class="form-check-label" [for]="'horario-' + horario">
+        {{ horario }}
+      </label>
+    </div>
+</div>
             </div>
 
             <div class="mb-3">
