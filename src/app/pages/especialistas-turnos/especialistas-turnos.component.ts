@@ -48,7 +48,6 @@ export class EspecialistasTurnosComponent implements OnInit, OnDestroy {
   }
 
   private inicializarComponente() {
-    // Suscripción al usuario actual
     const authSub = this.authService.currentUser$.subscribe(user => {
       console.log('Estado de autenticación actualizado:', user?.email);
       

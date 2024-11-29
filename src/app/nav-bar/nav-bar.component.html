@@ -31,14 +31,19 @@
           </a>
           <ul class="dropdown-menu dropdown-menu-end">
             <li>
-              <a class="dropdown-item"  (click)="redirectToMiPerfil()">
-                <i class="bi bi-calendar3"></i> Mi Perfil
+              <a class="dropdown-item" (click)="redirectToMiPerfil()">
+                <i class="bi bi-person-circle"></i> Mi Perfil
               </a>
             </li>
             <li><hr class="dropdown-divider"></li>
             <li>
-              <a class="dropdown-item"  (click)="redirectToMisTurnos()">
+              <a class="dropdown-item" (click)="redirectToMisTurnos()">
                 <i class="bi bi-calendar3"></i> Mis Turnos
+              </a>
+            </li>
+            <li *ngIf="tipoUsuario === 'especialista'">
+              <a class="dropdown-item" (click)="navegarMisHorarios()">
+                <i class="bi bi-clock"></i> Mis Horarios
               </a>
             </li>
             <li><hr class="dropdown-divider"></li>

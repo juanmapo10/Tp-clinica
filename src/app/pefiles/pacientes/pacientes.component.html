@@ -1,1 +1,43 @@
-<p>pacientes works!</p>
+<div class="patient-profile-container" *ngIf="currentUser$ | async as paciente">
+    <div class="patient-header">
+      <i class="medical-icon">🩺</i>
+      <h2>Perfil del Paciente</h2>
+    </div>
+    
+    <div class="patient-profile-content">
+      <div class="patient-info-grid">
+        <div class="patient-info-item">
+          <label>Nombre Completo</label>
+          <div class="value">{{ paciente.nombre }} {{ paciente.apellido }}</div>
+        </div>
+        
+        <div class="patient-info-item">
+          <label>Correo Electrónico</label>
+          <div class="value">{{ paciente.email }}</div>
+        </div>
+        
+        <div class="patient-info-item">
+          <label>Edad</label>
+          <div class="value">{{ paciente.edad }} años</div>
+        </div>
+        
+        <div class="patient-info-item">
+          <label>DNI</label>
+          <div class="value">{{ paciente.dni }}</div>
+        </div>
+      </div>
+      
+      <div class="patient-info-grid" *ngIf="paciente.obraSocial">
+        <div class="patient-info-item">
+          <label>Obra Social</label>
+          <div class="value">{{ paciente.obraSocial }}</div>
+        </div>
+      </div>
+      
+      <div class="patient-images" *ngIf="paciente.imagenes && paciente.imagenes.length > 0">
+        <img *ngFor="let imagen of paciente.imagenes" 
+             [src]="imagen" 
+             alt="Imagen de perfil del paciente">
+      </div>
+    </div>
+  </div>

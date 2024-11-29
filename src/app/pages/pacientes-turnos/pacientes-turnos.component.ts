@@ -225,12 +225,12 @@ export class PacientesTurnosComponent implements OnInit, OnDestroy {
 
   getSpecialtyImage(specialty: string): string {
     const specialtyImages: { [key: string]: string } = {
-      'traumatologo': 'traumatologo.svg',
-      'enfermero': 'enfermero.svg',
-      'cirujano': 'cirujano.svg',
-      'anestesista': 'anestesista.svg',
+      'traumatologo': 'traumatologo.png',
+      'enfermero': 'enfermero.png',
+      'cirujano': 'cirujano.png',
+      'anestesista': 'anestesista.png',
+      'kinesiologia': 'kinesiologo.png',
     };
-  
     return specialtyImages[specialty] || "default.svg";
   }
 

@@ -217,7 +217,31 @@ export class AuthService {
     }
   }
 
+  async getCurrentPatientProfile(): Promise<Usuario | null> {
+    const user = this.auth.currentUser;
+    if (!user) return null;
   
+    try {
+      const userDoc = await getDoc(doc(this.firestore, `usuarios/${user.uid}`));
+      
+      if (!userDoc.exists()) {
+        return null;
+      }
+  
+      const userData = userDoc.data() as Usuario;
+      
+
+      
+  
+      return {
+        ...userData,
+        uid: user.uid
+      };
+    } catch (error) {
+      console.error('Error fetching patient profile:', error);
+      throw error;
+    }
+  }
 
 }
 

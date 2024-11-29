@@ -496,3 +496,38 @@
   word-wrap: break-word;
 }
 
+.specialty-selection {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 15px; /* Reduces space between buttons */
+}
+
+.speciality-btn {
+  width: 100px; /* Increased size */
+  height: 100px; /* Increased size */
+  border-radius: 50%;
+  border: 3px solid transparent;
+  padding: 0;
+  background: none;
+  transition: all 0.3s ease;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.speciality-btn img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.speciality-btn:hover {
+  border-color: var(--secondary-color);
+  transform: scale(1.05);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.speciality-btn.active {
+  border-color: var(--secondary-color);
+  box-shadow: 0 0 0 4px rgba(52, 152, 219, 0.3);
+}

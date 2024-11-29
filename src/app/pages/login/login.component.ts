@@ -22,7 +22,7 @@ export class LoginComponent {
   usuariosRapidos = [
     { email: 'juanmanuelportela2@gmail.com', tipo: 'admin' },
     { email: 'sonahi5212@edectus.com', tipo: 'paciente' },
-    { email: 'vobowi1539@cantozil.com', tipo: 'especialista' }
+    { email: 'giwixew414@bflcafe.com', tipo: 'especialista' }
   ];
 
   constructor(

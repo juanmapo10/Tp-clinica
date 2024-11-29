@@ -7,21 +7,16 @@
       </div>
       
       <div class="card-body">
-        <!-- Manejo de Errores -->
         <div *ngIf="error" class="alert alert-danger d-flex align-items-center" role="alert">
           <i class="fas fa-exclamation-triangle me-2"></i>
           {{ error }}
         </div>
-        
-        <!-- Indicador de Carga -->
         <div *ngIf="cargandoTurnos" class="text-center my-4">
           <div class="spinner-border text-primary" role="status">
             <span class="visually-hidden">Cargando...</span>
           </div>
           <p class="text-muted mt-2">Cargando turnos...</p>
         </div>
-        
-        <!-- Botón de Solicitar Turno -->
         <div class="d-flex justify-content-end mb-3">
           <button 
             (click)="mostrarSolicitarTurno = !mostrarSolicitarTurno" 
@@ -30,10 +25,7 @@
             {{ mostrarSolicitarTurno ? 'Cancelar' : 'Solicitar Nuevo Turno' }}
           </button>
         </div>
-
-        <!-- Proceso de Solicitud de Turno -->
         <div *ngIf="mostrarSolicitarTurno" class="appointment-process">
-          <!-- Selección de Especialista -->
           <div class="mb-4">
             <h3 class="text-secondary mb-3">
               <i class="fas fa-user-md me-2"></i>Selecciona un Especialista
@@ -62,19 +54,20 @@
               <i class="fas fa-briefcase-medical me-2"></i>
               Especialidades de {{ especialistaSeleccionado.nombre }}
             </h3>
-            <div class="row g-2">
+            <div class="row g-3">
               <div *ngFor="let especialidad of especialistaSeleccionado.especialidades" class="col-6 col-md-3">
                 <button 
-                  class="btn btn-outline-secondary w-100"
+                  class="speciality-btn"
                   (click)="seleccionarEspecialidad(especialidad)"
                   [class.active]="especialidadSeleccionada === especialidad">
-                  {{ especialidad }}
-                </button>
+                  <img 
+                    [src]="'/assets/' + getSpecialtyImage(especialidad)" 
+                    alt="{{ especialidad }}"
+                  >
+              </button>
               </div>
             </div>
           </div>
-
-          <!-- Selección de Fecha -->
           <div *ngIf="especialidadSeleccionada && fechasDisponibles.length" class="mb-4">
             <h3 class="text-secondary mb-3">
               <i class="fas fa-calendar-alt me-2"></i>Selecciona una Fecha
@@ -91,8 +84,6 @@
               </div>
             </div>
           </div>
-
-          <!-- Selección de Horario -->
           <div *ngIf="fechaSeleccionada && horariosDisponibles.length" class="mb-4">
             <h3 class="text-secondary mb-3">
               <i class="fas fa-clock me-2"></i>Selecciona un Horario
@@ -107,8 +98,6 @@
               </div>
             </div>
           </div>
-
-          <!-- Botón de Confirmación -->
           <div *ngIf="validarDatosTurno()" class="mt-4">
             <button 
               class="btn btn-success btn-lg w-100 d-flex align-items-center justify-content-center"
@@ -121,9 +110,7 @@
       </div>
     </div>
   </div>
-
   <div *ngIf="!cargandoTurnos && turnos.length > 0">
-    <!-- Filtros -->
     <div class="filtros">
       <input 
         type="text" 
@@ -218,7 +205,6 @@
       </li>
     </ul>
   </div>
-  <!-- Review Dialog -->
 <div *ngIf="dialogoResena" class="modal-overlay">
   <div class="modal-dialog">
     <div class="modal-content">
