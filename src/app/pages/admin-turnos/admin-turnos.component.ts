@@ -1,21 +1,19 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Turno, TurnoService } from '../../services/turno.service';
 import { AuthService, Usuario } from '../../services/auth.service';
-import { BehaviorSubject, Subscription } from 'rxjs';
-import { take } from 'rxjs/operators';
-import { format } from 'date-fns';
-import { id } from 'date-fns/locale';
+import { BehaviorSubject, Subscription, take } from 'rxjs';
 
 @Component({
-  selector: 'app-pacientes-turnos',
+  selector: 'app-admin-turnos',
   standalone: true,
-  imports: [CommonModule, FormsModule],
-  templateUrl: './pacientes-turnos.component.html',
-  styleUrls: ['./pacientes-turnos.component.css']
+  imports: [CommonModule,FormsModule],
+  templateUrl: './admin-turnos.component.html',
+  styleUrl: './admin-turnos.component.css'
 })
-export class PacientesTurnosComponent implements OnInit, OnDestroy {
+export class AdminTurnosComponent implements OnInit{
+
   currentUser$ = new BehaviorSubject<Usuario | null>(null);
   error: string | null = null;
   successMessage: string | null = null;
@@ -25,7 +23,8 @@ export class PacientesTurnosComponent implements OnInit, OnDestroy {
   especialistas: Usuario[] = [];
   especialistaSeleccionado: Usuario | null = null;
   especialidadesDelEspecialista: string[] = [];
-  
+  usuarios: Usuario[] = [];
+
   cargandoTurnos: boolean = true;
   mostrarSolicitarTurno: boolean = false;
   especialidadSeleccionada: string = '';
@@ -44,6 +43,9 @@ export class PacientesTurnosComponent implements OnInit, OnDestroy {
   dialogoResena: Turno | null = null;
   textoResena: string = '';
   modoLecturaResena: boolean = false;
+
+  mostrarListaPacientes: boolean = false;
+  pacienteSeleccionado: Usuario | null = null;
   
   
   opcionesEncuesta = [
@@ -61,6 +63,7 @@ export class PacientesTurnosComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.inicializarComponente();
+    this.cargarUsuarios();
     this.cargarEspecialistas();
   }
 
@@ -74,7 +77,7 @@ export class PacientesTurnosComponent implements OnInit, OnDestroy {
         try {
           const usauriotipo = await this.authService.getCurrentUserType();
           
-          if (usauriotipo === 'paciente') {
+          if (usauriotipo === 'admin') {
             const currentUser = {
               uid: user.uid,
               email: user.email,
@@ -83,7 +86,7 @@ export class PacientesTurnosComponent implements OnInit, OnDestroy {
             this.currentUser$.next(currentUser);
             this.cargarDatosIniciales();
           } else {
-            this.error = 'Acceso no autorizado: Usuario no es paciente';
+            this.error = 'Acceso no autorizado: Usuario no es administrador';
           }
         } catch (error) {
           this.error = 'Error al cargar información de usuario';
@@ -94,6 +97,25 @@ export class PacientesTurnosComponent implements OnInit, OnDestroy {
     });
 
     this.subscriptions.add(authSub);
+  }
+
+
+  seleccionarPaciente(paciente: Usuario) {
+    this.pacienteSeleccionado = paciente;
+    this.mostrarListaPacientes = false;
+    this.mostrarSolicitarTurno = true;
+  }
+
+  resetearSeleccion() {
+    this.pacienteSeleccionado = null;
+    this.especialistaSeleccionado = null;
+    this.especialidadSeleccionada = '';
+    this.fechaSeleccionada = null;
+    this.horarioSeleccionado = null;
+    this.fechasDisponibles = [];
+    this.horariosDisponibles = [];
+    this.mostrarSolicitarTurno = false;
+    this.mostrarListaPacientes = true;
   }
 
   cargarEspecialistas() {
@@ -110,6 +132,24 @@ export class PacientesTurnosComponent implements OnInit, OnDestroy {
     
     this.subscriptions.add(especialistasub); 
   }
+
+  cargarUsuarios() {
+    const usuariosSub = this.turnoService.getPacientes()
+      .pipe(take(1)) 
+      .subscribe(
+        usuarios => {
+          this.usuarios = usuarios; 
+          console.log('Usuarios cargados correctamente:', this.usuarios);
+        },
+        error => {
+          this.error = 'Error al cargar usuarios';
+          console.error('Error al cargar usuarios:', error);
+        }
+      );
+  
+    this.subscriptions.add(usuariosSub);
+  }
+  
 
   seleccionarEspecialista(especialista: Usuario) {
     this.especialistaSeleccionado = especialista;
@@ -184,11 +224,12 @@ export class PacientesTurnosComponent implements OnInit, OnDestroy {
       this.error = 'Por favor complete todos los campos necesarios.';
       return;
     }
-    const currentUser = await this.currentUser$.pipe(take(1)).toPromise();
-    if (!currentUser) {
-      this.error = 'Usuario no autenticado';
+    
+    if (!this.pacienteSeleccionado) {
+      this.error = 'Debe seleccionar un paciente';
       return;
     }
+
     try {
       if (!this.fechaSeleccionada || !this.horarioSeleccionado) {
         this.error = 'Debe seleccionar fecha y hora';
@@ -198,19 +239,21 @@ export class PacientesTurnosComponent implements OnInit, OnDestroy {
       const [hours, minutes] = this.horarioSeleccionado.split(':').map(Number);
       const fechaHoraTurno = new Date(this.fechaSeleccionada);
       fechaHoraTurno.setHours(hours, minutes, 0, 0);
+
       const turno: Omit<Turno, 'id'> = {
-        pacienteId: currentUser.uid,
-        especialistaId: this.especialistaSeleccionado!.uid,
+        pacienteId: this.pacienteSeleccionado.uid!,
+        especialistaId: this.especialistaSeleccionado!.uid!,
         especialista: this.especialistaSeleccionado!.nombre,
         especialidad: this.especialidadSeleccionada,
         fecha: fechaHoraTurno,
         estado: 'pendiente',
-        paciente: currentUser.email || ''
+        paciente: this.pacienteSeleccionado.email
       };
 
       const turnoId = await this.turnoService.crearTurno(turno);
       console.log("turno creado exitosamente, id : ", turnoId)
-      this.resetearDatos();
+      this.resetearSeleccion();
+      this.successMessage = 'Turno creado exitosamente';
       setTimeout(() => {
         this.successMessage = null;
       }, 3000);
@@ -278,7 +321,7 @@ export class PacientesTurnosComponent implements OnInit, OnDestroy {
     this.error = null;
 
     try {
-      const turnosSub = this.turnoService.getTurnosPaciente(user.uid).subscribe(
+      const turnosSub = this.turnoService.getAllTurnos().subscribe(
         turnos => {
           console.log('Turnos recibidos:', turnos.length);
           this.turnos = this.ordenarTurnos(turnos);
@@ -375,7 +418,9 @@ export class PacientesTurnosComponent implements OnInit, OnDestroy {
     try {
       await this.turnoService.agregarResena(this.dialogoResena.id, this.textoResena.trim());
       console.log('Reseña guardada exitosamente');
+      
       await this.cargarTurnos();
+      
       this.dialogoResena = null;
       this.textoResena = '';
       this.modoLecturaResena = false;

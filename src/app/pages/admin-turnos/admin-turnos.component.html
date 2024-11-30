@@ -1,0 +1,266 @@
+<div class="container-fluid patient-appointments p-4 bg-light">
+    <div class="card shadow-sm">
+      <div class="card-header bg-primary text-white">
+        <h2 class="mb-0">
+          <i class="fas fa-calendar-check me-2"></i>Administración de Turnos
+        </h2>
+      </div>
+      <div class="card-body">
+        <div *ngIf="error" class="alert alert-danger d-flex align-items-center" role="alert">
+          <i class="fas fa-exclamation-triangle me-2"></i>
+          {{ error }}
+        </div>
+        <div *ngIf="successMessage" class="alert alert-success">
+          {{ successMessage }}
+        </div>
+        <div *ngIf="!mostrarSolicitarTurno && !pacienteSeleccionado" class="patient-selection">
+          <h3 class="text-secondary mb-3">
+            <i class="fas fa-users me-2"></i>Seleccionar Paciente
+          </h3>
+          <div class="row g-3">
+            <div *ngFor="let usuario of usuarios" class="col-6 col-md-3">
+              <div 
+                class="card patient-card h-100 cursor-pointer"
+                (click)="seleccionarPaciente(usuario)"
+              >
+                <div class="card-body text-center">
+                  <img 
+                    [src]="usuario.imagenes?.length ? usuario.imagenes[0] : 'assets/default-avatar.png'" 
+                    class="rounded-circle mb-3 patient-avatar" 
+                    alt="{{ usuario.nombre }} {{ usuario.apellido }}"
+                  >
+                  <h5 class="card-title">{{ usuario.nombre }} {{ usuario.apellido }}</h5>
+                  <p class="card-text text-muted">{{ usuario.email }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div *ngIf="pacienteSeleccionado" class="appointment-booking">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h3 class="text-secondary">
+              <i class="fas fa-user-plus me-2"></i>
+              Solicitar Turno para {{ pacienteSeleccionado.nombre }} {{ pacienteSeleccionado.apellido }}
+            </h3>
+            <button 
+              (click)="resetearSeleccion()" 
+              class="btn btn-outline-danger">
+              <i class="fas fa-arrow-left me-2"></i>Cancelar
+            </button>
+          </div>
+          <div class="mb-4">
+            <h3 class="text-secondary mb-3">
+              <i class="fas fa-user-md me-2"></i>Selecciona un Especialista
+            </h3>
+            <div class="row g-3">
+              <div *ngFor="let especialista of especialistas" class="col-6 col-md-3">
+                <div 
+                  class="card specialist-card h-100 cursor-pointer"
+                  (click)="seleccionarEspecialista(especialista)"
+                  [class.border-primary]="especialistaSeleccionado === especialista">
+                  <div class="card-body text-center">
+                    <img 
+                      [src]="especialista.imagenes || 'assets/default-avatar.png'" 
+                      class="rounded-circle mb-3 specialist-avatar" 
+                      alt="{{ especialista.nombre }}">
+                    <h5 class="card-title">{{ especialista.nombre }}</h5>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Especialidades -->
+          <div *ngIf="especialistaSeleccionado" class="mb-4">
+            <h3 class="text-secondary mb-3">
+              <i class="fas fa-briefcase-medical me-2"></i>
+              Especialidades de {{ especialistaSeleccionado.nombre }}
+            </h3>
+            <div class="row g-3">
+              <div *ngFor="let especialidad of especialistaSeleccionado.especialidades" class="col-6 col-md-3">
+                <button 
+                  class="speciality-btn"
+                  (click)="seleccionarEspecialidad(especialidad)"
+                  [class.active]="especialidadSeleccionada === especialidad">
+                  <img 
+                    [src]="'/assets/' + getSpecialtyImage(especialidad)" 
+                    alt="{{ especialidad }}"
+                  >
+              </button>
+              </div>
+            </div>
+          </div>
+          <div *ngIf="especialidadSeleccionada && fechasDisponibles.length" class="mb-4">
+            <h3 class="text-secondary mb-3">
+              <i class="fas fa-calendar-alt me-2"></i>Selecciona una Fecha
+            </h3>
+            <div class="row g-2">
+              <div *ngFor="let fecha of fechasDisponibles" class="col-6 col-md-3">
+                <button 
+                  class="btn btn-outline-info w-100"
+                  (click)="seleccionarFecha(fecha)"
+                  [class.active]="fechaSeleccionada === fecha"
+                  [disabled]="!fechasDisponibles.includes(fecha)">
+                  {{ formatearFecha(fecha) }}
+                </button>
+              </div>
+            </div>
+          </div>
+          <div *ngIf="fechaSeleccionada && horariosDisponibles.length" class="mb-4">
+            <h3 class="text-secondary mb-3">
+              <i class="fas fa-clock me-2"></i>Selecciona un Horario
+            </h3>
+            <div class="row g-2">
+              <div *ngFor="let horario of horariosDisponibles" class="col-6 col-md-3">
+                <button 
+                  class="btn btn-outline-success w-100"
+                  (click)="seleccionarHorario(horario)">
+                  {{ horario }}
+                </button>
+              </div>
+            </div>
+          </div>
+          <div *ngIf="validarDatosTurno()" class="mt-4">
+            <button 
+              class="btn btn-success btn-lg w-100 d-flex align-items-center justify-content-center"
+              (click)="confirmarTurno()">
+              <i class="fas fa-check-circle me-2"></i>
+              Confirmar Turno
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div *ngIf="!cargandoTurnos && turnos.length > 0">
+    <div class="filtros">
+      <input 
+        type="text" 
+        [(ngModel)]="filtroEspecialidad" 
+        placeholder="Filtrar por especialidad"
+        class="form-control">
+      <input 
+        type="text" 
+        [(ngModel)]="filtroPaciente" 
+        placeholder="Filtrar por especialista"
+        class="form-control">
+    </div>
+
+    <ul class="turnos-list">
+      <li *ngFor="let turno of filtrarTurnos()" class="turno-item">
+        <div class="turno-info">
+          <span class="estado" [attr.data-estado]="turno.estado">Estado: {{ turno.estado }}</span>
+          <span class="Fecha">Fecha: {{ turno.fecha | date: 'shortDate' }}</span>
+          <span class="Hora">Hora: {{ turno.fecha | date: 'shortTime' }}</span>
+          <span class="Especialidad">Especialidad: {{ turno.especialidad }}</span>
+          <span class="Especialista">Especialista: {{ turno.especialista }}</span>
+          <span *ngIf="turno.comentario" class="Comentario">Comentario: {{ turno.comentario }}</span>
+        </div>
+        
+        <div class="turno-actions">
+          <button 
+            *ngIf="turno.estado === 'pendiente'"
+            (click)="mostrarEncuesta = turno.id"
+            class="btn btn-danger">
+            Cancelar
+          </button>
+
+          <div *ngIf="turno.estado === 'realizado' && !turno.encuesta" class="encuesta">
+            <h4>Calificar atención</h4>
+            <div class="form-group">
+              <label for="calificacion">Satisfacción:</label>
+              <select
+                id="calificacion"
+                [(ngModel)]="calificacionSeleccionada"
+                class="form-control"
+              >
+                <option value="" disabled>Seleccione una opción</option>
+                <option *ngFor="let opcion of opcionesEncuesta" [value]="opcion.valor">
+                  {{ opcion.etiqueta }}
+                </option>
+              </select>
+            </div>
+            <button
+              (click)="completarEncuesta(turno.id, { satisfaction: calificacionSeleccionada })"
+              [disabled]="!calificacionSeleccionada"
+              class="btn btn-primary mt-2"
+            >
+              Enviar Encuesta
+            </button>
+          </div>
+        </div>
+        
+
+        <div *ngIf="mostrarEncuesta === turno.id" class="cancelacion-comentario">
+          <h4>Motivo de la cancelación</h4>
+          <textarea 
+            [(ngModel)]="comentarioCancelacion"
+            rows="3"
+            placeholder="Escribe aquí tu motivo para cancelar el turno"
+            class="form-control">
+          </textarea>
+          <button 
+            (click)="confirmarCancelacion(turno.id)"
+            class="btn btn-primary mt-2">
+            Enviar Comentario y Cancelar Turno
+          </button>
+          <button 
+            (click)="mostrarEncuesta = null"
+            class="btn btn-secondary mt-2">
+            Cancelar
+          </button>
+        </div>
+        <div *ngIf="turno.estado === 'realizado' && turno.encuesta">
+          <button 
+            *ngIf="!turno.resena"
+            (click)="abrirDialogoResena(turno)"
+            class="btn btn-outline-primary">
+            <i class="fas fa-comment me-2"></i>Dejar Reseña
+          </button>
+          <button 
+            *ngIf="turno.resena"
+            (click)="verResena(turno)"
+            class="btn btn-outline-secondary">
+            <i class="fas fa-eye me-2"></i>Ver Reseña
+          </button>
+        </div>
+      </li>
+    </ul>
+  </div>
+<div *ngIf="dialogoResena" class="modal-overlay">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">
+          {{ modoLecturaResena ? 'Reseña' : 'Escribir Reseña' }}
+        </h4>
+        <button (click)="cerrarDialogoResena()" class="close btn-close"></button>
+      </div>
+      <div class="modal-body">
+        <textarea 
+          *ngIf="!modoLecturaResena"
+          [(ngModel)]="textoResena"
+          rows="4"
+          class="form-control"
+          placeholder="Escribe tu reseña aquí...">
+        </textarea>
+        <p *ngIf="modoLecturaResena" class="review-text">
+          {{ textoResena }}
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button 
+          *ngIf="!modoLecturaResena"
+          (click)="guardarResena()"
+          class="btn btn-primary">
+          Guardar Reseña
+        </button>
+        <button 
+          (click)="cerrarDialogoResena()"
+          class="btn btn-secondary">
+          {{ modoLecturaResena ? 'Cerrar' : 'Cancelar' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -19,7 +19,7 @@ import { emailVerified } from '@angular/fire/auth-guard';
 })
 export class RegistroComponent implements OnInit {
   registroForm: FormGroup;
-  tipoUsuario: 'paciente' | 'especialista' = 'paciente';
+  tipoUsuario: 'paciente' | 'especialista' | null = null;
   especialidades$: Observable<string[]>;
   imagenes: File[] = [];
   nuevaEspecialidad: string = '';
@@ -28,6 +28,7 @@ export class RegistroComponent implements OnInit {
   mensajeError: string = '';
   diasSemana = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'];
   horarios = Array.from({ length: 10 }, (_, i) => `${8 + i}:00`);
+  
   
   constructor(
     private fb: FormBuilder,
@@ -84,6 +85,18 @@ export class RegistroComponent implements OnInit {
       control.markAsDirty(); 
     }
   }
+
+  seleccionarTipoUsuario(tipo: 'paciente' | 'especialista') {
+    this.tipoUsuario = tipo;
+    this.registroForm = tipo === 'paciente' ? 
+      this.crearFormularioPaciente() : 
+      this.crearFormularioEspecialista();
+    this.imagenes = [];
+    this.mensajeError = '';
+    this.mensajeExito = '';
+  }
+
+
   onFileSelected(event: any) {
     const files = event.target.files;
     if (files) {
@@ -135,8 +148,6 @@ export class RegistroComponent implements OnInit {
           ...this.registroForm.value,
           tipo: this.tipoUsuario,
         };
-        
-        // Para especialistas, pasar días y horarios
         const diasDisponibles = this.tipoUsuario === 'especialista' 
           ? this.registroForm.get('dias')?.value 
           : undefined;

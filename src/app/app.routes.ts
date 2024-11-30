@@ -9,6 +9,8 @@ import { PacientesTurnosComponent } from './pages/pacientes-turnos/pacientes-tur
 import { EspecialistasTurnosComponent } from './pages/especialistas-turnos/especialistas-turnos.component';
 import { EspecialistasComponente } from './pefiles/especialistas/especialistas.component';
 import {MishorariosComponent} from './mishorarios/mishorarios.component'
+import { AdminTurnosComponent } from './pages/admin-turnos/admin-turnos.component'
+import { AdministradorComponent } from './pefiles/administrador/administrador.component'
 
 export const routes: Routes = [
     { path: 'home', component: HomeComponent },
@@ -21,4 +23,6 @@ export const routes: Routes = [
     {path : 'pacientes-turnos', component : PacientesTurnosComponent},
     {path : 'perfiles-especialistas', component : EspecialistasComponente},
     {path : 'mishorarios', component : MishorariosComponent},
+    {path : 'admin-turnos', component : AdminTurnosComponent},
+    {path : 'perfiles-admin', component : AdministradorComponent},
 ];

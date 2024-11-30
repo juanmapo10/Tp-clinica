@@ -1,0 +1,563 @@
+/* Variables globales */
+:root {
+    --primary-color: #2c3e50;
+    --secondary-color: #3498db;
+    --success-color: #2ecc71;
+    --danger-color: #e74c3c;
+    --warning-color: #f1c40f;
+    --gray-light: #ecf0f1;
+    --gray-dark: #95a5a6;
+    --white: #ffffff;
+    --shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    --border-radius: 8px;
+  }
+  
+  /* Contenedor principal */
+  :host {
+    display: block;
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  
+  h2 {
+    color: var(--primary-color);
+    margin-bottom: 25px;
+    border-bottom: 2px solid var(--secondary-color);
+    padding-bottom: 10px;
+  }
+  
+  /* Mensajes de error */
+  .alert-danger {
+    background-color: rgba(231, 76, 60, 0.1);
+    border: 1px solid var(--danger-color);
+    color: var(--danger-color);
+    padding: 15px;
+    border-radius: var(--border-radius);
+    margin-bottom: 20px;
+  }
+  
+  /* Spinner de carga */
+  .loading-spinner {
+    text-align: center;
+    padding: 20px;
+    color: var(--gray-dark);
+  }
+  
+  .loading-spinner::after {
+    content: '';
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid var(--gray-light);
+    border-top-color: var(--secondary-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-left: 10px;
+  }
+  
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+  
+  .filtros {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 15px;
+    margin-bottom: 25px;
+  }
+  
+  .form-control {
+    padding: 10px 15px;
+    border: 1px solid var(--gray-dark);
+    border-radius: var(--border-radius);
+    font-size: 14px;
+    transition: border-color 0.3s ease;
+  }
+  
+  .form-control:focus {
+    outline: none;
+    border-color: var(--secondary-color);
+    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+  }
+  
+  /* Lista de turnos */
+  .turnos-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .turno-item {
+    background-color: var(--white);
+    border-radius: var(--border-radius);
+    padding: 15px;
+    margin-bottom: 15px;
+    box-shadow: var(--shadow);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: transform 0.2s ease;
+  }
+  
+  .turno-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  }
+  
+  .turno-info {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+    align-items: center;
+  }
+  
+  .turno-info span {
+    padding: 5px 10px;
+    border-radius: var(--border-radius);
+    font-size: 14px;
+  }
+  
+  .fecha {
+    background-color: var(--gray-light);
+    color: var(--primary-color);
+    font-weight: bold;
+  }
+  
+  .especialidad {
+    color: var(--secondary-color);
+    font-weight: 500;
+  }
+  
+  .estado {
+    text-transform: capitalize;
+    font-weight: 500;
+  }
+  
+  .turno-actions {
+    display: flex;
+    gap: 10px;
+  }
+  
+  /* Botones */
+  .btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s ease;
+  }
+  
+  .btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  
+  .btn-primary {
+    background-color: var(--secondary-color);
+    color: var(--white);
+  }
+  
+  .btn-primary:hover:not(:disabled) {
+    background-color: #2980b9;
+  }
+  
+  .btn-success {
+    background-color: var(--success-color);
+    color: var(--white);
+  }
+  
+  .btn-success:hover:not(:disabled) {
+    background-color: #27ae60;
+  }
+  
+  .btn-danger {
+    background-color: var(--danger-color);
+    color: var(--white);
+  }
+  
+  .btn-danger:hover:not(:disabled) {
+    background-color: #c0392b;
+  }
+  
+  /* Mensaje de no turnos */
+  .no-turnos {
+    text-align: center;
+    padding: 40px;
+    background-color: var(--gray-light);
+    border-radius: var(--border-radius);
+    color: var(--gray-dark);
+    font-size: 16px;
+  }
+  
+  /* Formulario para solicitar turno */
+  .solicitar-turno-form {
+    background-color: var(--white);
+    padding: 25px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    margin-top: 20px;
+  }
+  
+  .solicitar-turno-form h3 {
+    color: var(--primary-color);
+    margin-bottom: 20px;
+  }
+  
+  .form-group {
+    margin-bottom: 20px;
+  }
+  
+  .form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--primary-color);
+    font-weight: 500;
+  }
+  
+  select.form-control {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--gray-dark);
+    border-radius: var(--border-radius);
+    background-color: var(--white);
+    cursor: pointer;
+  }
+  
+  select.form-control:focus {
+    outline: none;
+    border-color: var(--secondary-color);
+    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .turno-item {
+      flex-direction: column;
+      gap: 15px;
+    }
+  
+    .turno-info {
+      grid-template-columns: 1fr;
+      text-align: center;
+    }
+  
+    .turno-actions {
+      width: 100%;
+      justify-content: center;
+    }
+  
+    .filtros {
+      grid-template-columns: 1fr;
+    }
+  }
+  
+  /* Animaciones */
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  
+  .solicitar-turno-form {
+    animation: fadeIn 0.3s ease-in-out;
+  }
+  
+  /* Estilos para el estado del turno */
+  .estado {
+    padding: 5px 10px;
+    border-radius: 20px;
+  }
+  
+  .estado[data-estado="pendiente"] {
+    background-color: rgba(241, 196, 15, 0.2);
+    color: #d35400;
+  }
+  
+  .estado[data-estado="realizado"] {
+    background-color: rgba(46, 204, 113, 0.2);
+    color: #27ae60;
+  }
+  
+  .estado[data-estado="cancelado"] {
+    background-color: rgba(231, 76, 60, 0.2);
+    color: #c0392b;
+  }
+  .encuesta {
+    margin-top: 20px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+  }
+  .specialist-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  .specialist-card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  }
+  .specialist-avatar {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+  }
+  .cursor-pointer {
+    cursor: pointer;
+  }
+/* Enhanced Turnos List Styles */
+.turnos-list {
+  display: grid;
+  gap: 20px;
+  padding: 0;
+  margin: 0;
+}
+
+.turno-item {
+  background-color: var(--white);
+  border-radius: 12px;
+  padding: 25px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(52, 152, 219, 0.1);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 20px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.turno-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 5px;
+  height: 100%;
+  background-color: var(--secondary-color);
+  transition: width 0.3s ease;
+}
+
+.turno-item:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+}
+
+.turno-item:hover::before {
+  width: 8px;
+}
+
+.turno-info {
+  flex-grow: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  align-items: center;
+  min-width: 250px;
+}
+
+.turno-info span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  background-color: rgba(52, 152, 219, 0.05);
+  color: var(--primary-color);
+}
+
+.turno-info span::before {
+  content: '';
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.turno-info .estado {
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.turno-info .estado[data-estado="pendiente"]::before {
+  background-color: #f39c12;
+}
+
+.turno-info .estado[data-estado="realizado"]::before {
+  background-color: #2ecc71;
+}
+
+.turno-info .estado[data-estado="cancelado"]::before {
+  background-color: #e74c3c;
+}
+
+.turno-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-left: auto;
+}
+
+.turno-actions .btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .turno-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .turno-info {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .turno-actions {
+    width: 100%;
+    justify-content: center;
+    margin-left: 0;
+    margin-top: 15px;
+  }
+}
+
+/* Animations */
+@keyframes slideIn {
+  from { 
+    opacity: 0; 
+    transform: translateY(20px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0); 
+  }
+}
+
+.turnos-list .turno-item {
+  animation: slideIn 0.5s ease forwards;
+  opacity: 0;
+  animation-delay: calc(var(--i, 0) * 0.1s);
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-dialog {
+  background-color: white;
+  border-radius: var(--border-radius);
+  width: 500px;
+  max-width: 90%;
+  padding: 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--gray-light);
+  padding-bottom: 15px;
+  margin-bottom: 15px;
+}
+
+.modal-body {
+  margin-bottom: 15px;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.review-text {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.specialty-selection {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 15px; /* Reduces space between buttons */
+}
+
+.speciality-btn {
+  width: 100px; /* Increased size */
+  height: 100px; /* Increased size */
+  border-radius: 50%;
+  border: 3px solid transparent;
+  padding: 0;
+  background: none;
+  transition: all 0.3s ease;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.speciality-btn img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.speciality-btn:hover {
+  border-color: var(--secondary-color);
+  transform: scale(1.05);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.speciality-btn.active {
+  border-color: var(--secondary-color);
+  box-shadow: 0 0 0 4px rgba(52, 152, 219, 0.3);
+}
+
+.patient-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+  border: 3px solid transparent;
+  overflow: hidden;
+}
+
+.patient-card:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  border-color: var(--secondary-color);
+}
+
+.patient-card .patient-avatar {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  margin-bottom: 15px;
+}
+
+.patient-card .card-title {
+  font-weight: 600;
+  color: var(--primary-color);
+  margin-bottom: 10px;
+}
+
+.patient-card .card-text {
+  color: var(--gray-dark);
+  font-size: 0.9rem;
+}

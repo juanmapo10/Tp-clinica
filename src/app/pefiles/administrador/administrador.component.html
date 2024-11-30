@@ -1,0 +1,60 @@
+<div class="patient-profile-container" *ngIf="currentUser$ | async as especialista">
+    <div class="patient-header">
+      <i class="medical-icon">🩺</i>
+      <h2>Perfil del Administrador</h2>
+    </div>
+    
+    <div class="patient-profile-content">
+      <div class="patient-info-grid">
+        <div class="patient-info-item">
+          <label>Nombre Completo</label>
+          <div class="value">{{ especialista.nombre }} {{ especialista.apellido }}</div>
+        </div>
+        
+        <div class="patient-info-item">
+          <label>Correo Electrónico</label>
+          <div class="value">{{ especialista.email }}</div>
+        </div>
+        
+        <div class="patient-info-item">
+          <label>Edad</label>
+          <div class="value">{{ especialista.edad }} años</div>
+        </div>
+        
+        <div class="patient-info-item">
+          <label>DNI</label>
+          <div class="value">{{ especialista.dni }}</div>
+        </div>
+      </div>
+      
+      <div class="patient-info-grid" *ngIf="especialista.obraSocial">
+        <div class="patient-info-item">
+          <label>Obra Social</label>
+          <div class="value">{{ especialista.obraSocial }}</div>
+        </div>
+      </div>
+      
+      <div class="patient-info-item">
+        <label>DNI</label>
+        <div class="value">{{ especialista.dni }}</div>
+      </div>
+      
+      <div class="patient-info-item" *ngIf="especialista.especialidades && especialista.especialidades.length > 0">
+        <label>Especialidades</label>
+        <ul>
+          <li *ngFor="let especialidad of especialista.especialidades">
+            {{ especialidad }}
+          </li>
+        </ul>
+      </div>
+  
+      <div class="patient-images" *ngIf="especialista.imagenes && especialista.imagenes.length > 0">
+        <img *ngFor="let imagen of especialista.imagenes" 
+             [src]="imagen" 
+             alt="Imagen de perfil del especialista">
+      </div>
+  
+     
+    </div>
+  </div>
+  

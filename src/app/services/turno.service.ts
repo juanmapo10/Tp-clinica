@@ -136,4 +136,51 @@ export class TurnoService {
         devolucion: devolucion 
       });
     }
+
+    getPacientes(): Observable<Usuario[]> {
+      const usuariosRef = collection(this.firestore, 'usuarios');
+      const q = query(
+        usuariosRef, 
+        where('tipo', '==', 'paciente')
+      );
+      return from(getDocs(q)).pipe(
+        map(snapshot => 
+          snapshot.docs.map(doc => ({
+            ...doc.data() as Usuario,
+            uid: doc.id
+          }))
+        )
+      );
+    }
+
+    getAllTurnos(): Observable<Turno[]> {
+      const turnosRef = collection(this.firestore, 'turnos');
+      
+      return from(getDocs(turnosRef)).pipe(
+        map(snapshot => 
+          snapshot.docs.map(doc => ({
+            ...doc.data() as Turno,
+            id: doc.id,
+            fecha: (doc.data() as any).fecha.toDate()
+          }))
+        )
+      );
+    }
+    async crearTurnoAdmin(turno: Omit<Turno, 'id'>, pacienteSeleccionado: Usuario): Promise<string> {
+      const turnosRef = collection(this.firestore, 'turnos');
+      const fechaFormateada = format(turno.fecha, 'dd/MM/yyyy');
+      const horario = format(turno.fecha, 'HH:mm');
+      
+      const docRef = await addDoc(turnosRef, {
+        ...turno,
+        pacienteId: pacienteSeleccionado.uid,
+        paciente: pacienteSeleccionado.email,
+        fecha: turno.fecha instanceof Date ? Timestamp.fromDate(turno.fecha) : turno.fecha,
+        fechaFormatead: fechaFormateada,
+        horario: horario,
+        estado: 'pendiente'
+      });
+      return docRef.id;
+    }
+    
 }

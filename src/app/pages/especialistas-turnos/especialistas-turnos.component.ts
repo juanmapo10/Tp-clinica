@@ -162,13 +162,12 @@ export class EspecialistasTurnosComponent implements OnInit, OnDestroy {
       this.error = 'Error al cancelar el turno';
     }
   }
-  
-  // Método para confirmar cancelación con comentario
+
   async confirmarCancelacion(turnoId: string) {
     if (this.comentarioCancelacion.trim()) {
       await this.cancelarTurno(turnoId, this.comentarioCancelacion);
-      this.mostrarEncuesta = null;  // Oculta la encuesta tras la cancelación
-      this.comentarioCancelacion = '';  // Limpia el comentario
+      this.mostrarEncuesta = null; 
+      this.comentarioCancelacion = '';
     } else {
       this.error = 'Por favor, ingresa un motivo para cancelar el turno.';
     }
@@ -189,27 +188,19 @@ export class EspecialistasTurnosComponent implements OnInit, OnDestroy {
       console.error('ID de turno no válido');
       return;
     }
-    
-    // Show devolution dialog
+
     this.mostrarDevolucion = turnoId;
   }
-  
-  // New method to confirm and finalize the turn with a return
+
   async confirmarRealizacionTurno() {
     if (!this.mostrarDevolucion) return;
   
     if (this.comentarioDevolucion.trim()) {
       try {
-        // Update turn status to 'realizado'
         await this.turnoService.actualizarEstadoTurno(this.mostrarDevolucion, 'realizado');
-        
-        // Add devolution comment
         await this.turnoService.agregarDevolucionnn(this.mostrarDevolucion, this.comentarioDevolucion);
-        
-        // Reload turns
         await this.cargarTurnos();
-        
-        // Reset dialog
+
         this.mostrarDevolucion = null;
         this.comentarioDevolucion = '';
       } catch (error) {

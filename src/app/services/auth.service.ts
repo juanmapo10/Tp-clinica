@@ -12,7 +12,7 @@ export interface Usuario {
   edad: number;
   dni: string;
   email: string;
-  tipo: 'paciente' | 'especialista' | 'administrador';
+  tipo: 'paciente' | 'especialista' | 'admin';
   obraSocial?: string;
   especialidades?: string[];
   imagenes: string[];
@@ -242,6 +242,55 @@ export class AuthService {
       throw error;
     }
   }
+
+  async getCurrentEspecialistaProfile(): Promise<Usuario | null> {
+    const user = this.auth.currentUser;
+    if (!user) return null;
+  
+    try {
+      const userDoc = await getDoc(doc(this.firestore, `usuarios/${user.uid}`));
+      if (!userDoc.exists()) {
+        return null;
+      }
+      const userData = userDoc.data() as Usuario;
+      return {
+        ...userData,
+        uid: user.uid
+      };
+    } catch (error) {
+      console.error('Error fetching patient profile:', error);
+      throw error;
+    }
+  }
+
+  async guardarHorariosEspecialista(especialistaUid: string, horariosSeleccionados: string[]): Promise<void> {
+    try {
+      const horariosRef = collection(this.firestore, 'horarios');
+      const q = query(horariosRef, where('especialistaUid', '==', especialistaUid));
+      const querySnapshot = await getDocs(q);
+      if (!querySnapshot.empty) {
+        const docRef = querySnapshot.docs[0].ref;
+        await setDoc(docRef, {
+          especialistaUid,
+          horariosDisponibles: horariosSeleccionados
+        });
+      } else {
+        await addDoc(horariosRef, {
+          especialistaUid,
+          horariosDisponibles: horariosSeleccionados
+        });
+      }
+      const usuarioRef = doc(this.firestore, `usuarios/${especialistaUid}`);
+      await setDoc(usuarioRef, { 
+        horarios: horariosSeleccionados 
+      }, { merge: true });
+  
+    } catch (error) {
+      console.error('Error al guardar horarios del especialista:', error);
+      throw error;
+    }
+  }
+
 
 }
 

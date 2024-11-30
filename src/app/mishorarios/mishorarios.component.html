@@ -1,1 +1,18 @@
-<p>mishorarios works!</p>
+<div *ngIf="currentUser$ | async as usuario" class="container">
+    <h2>Mis Horarios Disponibles</h2>
+    
+    <div class="horarios-list">
+      <div 
+        *ngFor="let horario of horariosDisponibles" 
+        class="horario-item"
+        [class.seleccionado]="horario.seleccionado"
+        (click)="toggleHorario(horario)"
+      >
+        {{ horario.hora }}
+      </div>
+    </div>
+  
+    <button (click)="guardarHorarios()" class="btn-guardar">
+      Guardar Horarios
+    </button>
+  </div>

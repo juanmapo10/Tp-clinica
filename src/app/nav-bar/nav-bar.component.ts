@@ -24,7 +24,7 @@ export class NavBarComponent implements OnInit {
     try {
       await this.authService.logout();
       console.log('Sesión cerrada exitosamente');
-      this.tipoUsuario = ""; // Resetear tipo de usuario al cerrar sesión
+      this.tipoUsuario = ""; 
     } catch (error) {
       console.error('Error al cerrar sesión:', error);
     }
@@ -36,7 +36,8 @@ export class NavBarComponent implements OnInit {
       await this.router.navigate(['/especialistas-turnos']);
     } else if (userType === 'paciente') {
       await this.router.navigate(['/pacientes-turnos']);
-    }
+    }else if (userType === 'admin') {
+      await this.router.navigate(['/admin-turnos']);}
   }
 
   async redirectToMiPerfil() {
@@ -45,7 +46,8 @@ export class NavBarComponent implements OnInit {
       await this.router.navigate(['/perfiles-especialistas']);
     } else if (userType === 'paciente') {
       await this.router.navigate(['/perfiles-pacientes']);
-    }
+    }else if (userType === 'admin') {
+      await this.router.navigate(['/perfiles-admin']);}
   }
 
   async TraerTipoUsuario() {
@@ -61,10 +63,8 @@ export class NavBarComponent implements OnInit {
   async navegarMisHorarios() {
     await this.router.navigate(['/mishorarios']);
   }
-
   async ngOnInit() {
     try {
-      // Obtener el tipo de usuario cuando el usuario está autenticado
       this.user$.subscribe(async (user) => {
         if (user) {
           const userType = await this.authService.getCurrentUserType();
@@ -75,5 +75,10 @@ export class NavBarComponent implements OnInit {
       console.error('Error al obtener el tipo de usuario:', error);
       this.tipoUsuario = ''; 
     }
+  }
+
+  async navegarHome()
+  {
+  await this.router.navigate(['/home']);
   }
 }
