@@ -81,4 +81,6 @@ export class NavBarComponent implements OnInit {
   {
   await this.router.navigate(['/home']);
   }
+
+
 }

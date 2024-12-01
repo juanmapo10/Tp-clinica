@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Observable } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { AuthService, Usuario } from '../services/auth.service';
 import { CommonModule } from '@angular/common';
 
@@ -18,6 +18,9 @@ export class HomeComponent implements OnInit {
   cargando = false;
   mensajeExito = '';
   mensajeError = '';
+  usuarios: Usuario[] = [];
+  private usuariosSubscription: Subscription | null = null;
+
 
   constructor(
     private fb: FormBuilder,
@@ -27,7 +30,9 @@ export class HomeComponent implements OnInit {
     this.usuarios$ = this.authService.getUsuarios();
   }
 
-  ngOnInit() {}
+  ngOnInit() {
+    this.cargarUsuarios();
+  }
 
   private crearFormulario(): FormGroup {
     return this.fb.group({
@@ -82,6 +87,13 @@ export class HomeComponent implements OnInit {
   async toggleAprobacion(usuario: Usuario) {
     try {
       await this.authService.actualizarAprobacionEspecialista(usuario.uid!, !usuario.aprobado);
+      
+      // Opcional: Actualizar localmente para feedback inmediato
+      const index = this.usuarios.findIndex(u => u.uid === usuario.uid);
+      if (index !== -1) {
+        this.usuarios[index].aprobado = !usuario.aprobado;
+      }
+
       this.mensajeExito = `Usuario ${usuario.aprobado ? 'deshabilitado' : 'habilitado'} exitosamente`;
       setTimeout(() => this.mensajeExito = '', 3000);
     } catch (error) {
@@ -90,5 +102,18 @@ export class HomeComponent implements OnInit {
     }
   }
 
+  private cargarUsuarios() {
+    // Usar el método del servicio de autenticación para obtener usuarios
+    this.usuariosSubscription = this.authService.getUsuarios().subscribe({
+      next: (usuarios) => {
+        console.log('Usuarios cargados:', usuarios);
+        this.usuarios = usuarios;
+      },
+      error: (error) => {
+        console.error('Error al cargar usuarios:', error);
+        this.mensajeError = 'Error al cargar usuarios';
+      }
+    });
+  }
 
 }

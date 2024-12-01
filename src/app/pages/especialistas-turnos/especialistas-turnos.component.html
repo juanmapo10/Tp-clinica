@@ -16,19 +16,15 @@
     <div class="filtros">
       <input 
         type="text" 
-        [(ngModel)]="filtroEspecialidad" 
-        placeholder="Filtrar por especialidad"
-        class="form-control">
-      <input 
-        type="text" 
-        [(ngModel)]="filtroEspecialista" 
-        placeholder="Filtrar por especialista"
+        [(ngModel)]="textoBusqueda" 
+        (ngModelChange)="aplicarFiltro()"
+        placeholder="Buscar en turnos e historias clínicas"
         class="form-control">
     </div>
 
     <!-- Appointments List -->
     <ul class="turnos-list">
-      <li *ngFor="let turno of filtrarTurnos()" class="turno-item">
+      <li *ngFor="let turno of turnosFiltrados" class="turno-item">
         <div class="turno-info">
           <span class="estado" [attr.data-estado]="turno.estado">
             Estado: {{ turno.estado }}
@@ -95,9 +91,9 @@
     No tienes turnos pendientes.
   </div>
 
+  
   <!-- Overlay -->
   <div *ngIf="mostrarDevolucion" class="overlay" (click)="mostrarDevolucion = null"></div>
-
   <!-- Devolution Dialog -->
   <div *ngIf="mostrarDevolucion" class="devolucion-dialog">
     <h4>Devolución del Turno</h4>
@@ -119,4 +115,83 @@
       </button>
     </div>
   </div>
+</div>
+<!-- Historia Clinica Dialog -->
+<div *ngIf="mostrarHistoriaClinica" class="historia-clinica-dialog">
+  <h4>Cargar Historia Clínica</h4>
+  <form (ngSubmit)="guardarHistoriaClinica()">
+    <div class="datos-generales">
+      <h5>Datos Generales</h5>
+      <div class="form-group">
+        <label>Altura (cm)</label>
+        <input type="number" 
+               [(ngModel)]="historiaClinica.datosGenerales.altura" 
+               name="altura" 
+               class="form-control" 
+               required>
+      </div>
+      <div class="form-group">
+        <label>Peso (kg)</label>
+        <input type="number" 
+               [(ngModel)]="historiaClinica.datosGenerales.peso" 
+               name="peso" 
+               class="form-control" 
+               required>
+      </div>
+      <div class="form-group">
+        <label>Temperatura (°C)</label>
+        <input type="number" 
+               [(ngModel)]="historiaClinica.datosGenerales.temperatura" 
+               name="temperatura" 
+               class="form-control" 
+               required>
+      </div>
+      <div class="form-group">
+        <label>Presión</label>
+        <input type="text" 
+               [(ngModel)]="historiaClinica.datosGenerales.presion" 
+               name="presion" 
+               class="form-control" 
+               required>
+      </div>
+    </div>
+
+    <div class="datos-dinamicos">
+      <h5>Datos Dinámicos (máximo 3)</h5>
+      <div *ngFor="let dato of historiaClinica.datosDinamicos; let i = index" class="form-group">
+        <div class="input-group">
+          <input type="text" 
+                 [(ngModel)]="dato.clave" 
+                 [name]="'clave' + i" 
+                 placeholder="Clave" 
+                 class="form-control">
+          <input type="text" 
+                 [(ngModel)]="dato.valor" 
+                 [name]="'valor' + i" 
+                 placeholder="Valor" 
+                 class="form-control">
+          <button type="button" 
+                  (click)="eliminarDatoDinamico(i)" 
+                  class="btn btn-danger">
+            Eliminar
+          </button>
+        </div>
+      </div>
+      <button type="button" 
+              (click)="agregarDatoDinamico()" 
+              *ngIf="historiaClinica.datosDinamicos.length < 3" 
+              class="btn btn-secondary">
+        Agregar Dato Dinámico
+      </button>
+    </div>
+
+    <div class="dialog-actions">
+      <button type="submit" class="btn btn-primary">Guardar Historia Clínica</button>
+      <button type="button" 
+              (click)="mostrarHistoriaClinica = null" 
+              class="btn btn-secondary">
+        Cancelar
+      </button>
+    </div>
+  </form>
 </div>

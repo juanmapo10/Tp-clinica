@@ -135,15 +135,10 @@
   <div *ngIf="!cargandoTurnos && turnos.length > 0">
     <div class="filtros">
       <input 
-        type="text" 
-        [(ngModel)]="filtroEspecialidad" 
-        placeholder="Filtrar por especialidad"
-        class="form-control">
-      <input 
-        type="text" 
-        [(ngModel)]="filtroPaciente" 
-        placeholder="Filtrar por especialista"
-        class="form-control">
+      type="text" 
+      [(ngModel)]="filtroPaciente" 
+      placeholder="Buscar en turnos, especialidades, historias clínicas..."
+      class="form-control">
     </div>
 
     <ul class="turnos-list">

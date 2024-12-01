@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Firestore, collection, addDoc, getDocs, query, where, doc, updateDoc, Timestamp, setDoc, deleteDoc } from '@angular/fire/firestore';
+import { Firestore, collection, addDoc, getDocs, query, where, doc, updateDoc, Timestamp, setDoc, deleteDoc, getDoc } from '@angular/fire/firestore';
 import { Observable, from } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { Usuario } from './auth.service';
@@ -23,6 +23,23 @@ export interface Turno {
   devolucion?: string;
 }
 
+export interface HistoriaClinica {
+  uid: string;
+  turnoId: string;
+  fechaTurno?: Date;
+  horarioTurno?: string;
+  nombreEspecialista?: string;
+  datosGenerales: {
+    altura: number;
+    peso: number;
+    temperatura: number;
+    presion: string;
+  };
+  datosDinamicos: Array<{
+    clave: string;
+    valor: string;
+  }>;
+}
 
 @Injectable({
   providedIn: 'root'
@@ -182,5 +199,67 @@ export class TurnoService {
       });
       return docRef.id;
     }
+ 
     
+    async agregarHistoriaClinica(historiaClinica: HistoriaClinica): Promise<void> {
+      const historiaClinicaRef = collection(this.firestore, 'historiaclinica');
+      const turnoRef = doc(this.firestore, `turnos/${historiaClinica.turnoId}`);
+      const turnoSnapshot = await getDoc(turnoRef);
+      const turnoData = turnoSnapshot.data() as Turno;
+      await addDoc(historiaClinicaRef, {
+        ...historiaClinica,
+        pacienteId: turnoData.pacienteId,
+        fechaTurno: turnoData.fecha,
+        horarioTurno: turnoData.horario,
+        nombreEspecialista: turnoData.especialista
+      });
+    }
+    
+    async verificarHistoriaClinicaCargada(turnoId: string): Promise<boolean> {
+      try {
+        const historiaClinicaRef = collection(this.firestore, 'historiaclinica');
+        const q = query(historiaClinicaRef, where('turnoId', '==', turnoId));
+        
+        const snapshot = await getDocs(q);
+        console.log('Snapshot de historia clinica:', snapshot.docs.length);
+        
+        return snapshot.docs.length > 0;
+      } catch (error) {
+        console.error('Error al verificar historia clinica:', error);
+        return false;
+      }
+    }
+
+    getHistoriasClinicasPorEspecialista(especialistaId: string): Observable<HistoriaClinica[]> {
+      const historiaClinicaRef = collection(this.firestore, 'historiaclinica');
+      const q = query(historiaClinicaRef, where('uid', '==', especialistaId));
+      
+      return from(getDocs(q)).pipe(
+        map(snapshot => 
+          snapshot.docs.map(doc => ({
+            ...(doc.data() as HistoriaClinica),
+            documentId: doc.id
+          }))
+        )
+      );
+    }
+
+    
+    
+    getAllHistoriasClinicas(): Observable<HistoriaClinica[]> {
+      const historiaClinicaRef = collection(this.firestore, 'historiaclinica');
+      
+      return from(getDocs(historiaClinicaRef)).pipe(
+        map(snapshot => 
+          snapshot.docs.map(doc => ({
+            ...(doc.data() as HistoriaClinica),
+            documentId: doc.id
+          }))
+        )
+      );
+    }
+    
+
+    
+
 }

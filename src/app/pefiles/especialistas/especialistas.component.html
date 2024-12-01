@@ -57,3 +57,31 @@
    
   </div>
 </div>
+
+
+<div class="patients-attended-section">
+  <h3>Pacientes Atendidos</h3>
+  <div *ngIf="(pacientesAtendidos$ | async) as pacientes">
+    <div *ngIf="pacientes.length > 0; else noPatients">
+      <div *ngFor="let paciente of pacientes" class="patient-card">
+        <div class="patient-info-grid">
+          <div class="patient-info-item">
+            <label>Nombre Completo</label>
+            <div class="value">{{ paciente.nombre }} {{ paciente.apellido }}</div>
+          </div>
+          <div class="patient-info-item">
+            <label>Correo Electrónico</label>
+            <div class="value">{{ paciente.email }}</div>
+          </div>
+          <div class="patient-info-item">
+            <label>DNI</label>
+            <div class="value">{{ paciente.dni }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <ng-template #noPatients>
+      <p>No se han atendido pacientes aún.</p>
+    </ng-template>
+  </div>
+</div>

@@ -174,10 +174,13 @@ export class AuthService {
     const usuariosRef = collection(this.firestore, 'usuarios');
     return from(getDocs(usuariosRef)).pipe(
       map(snapshot => {
-        return snapshot.docs.map(doc => ({
-          ...doc.data() as Usuario,
-          uid: doc.id
-        }));
+        return snapshot.docs.map(doc => {
+          const data = doc.data() as Usuario;
+          return {
+            ...data,
+            uid: doc.id  
+          };
+        });
       })
     );
   }

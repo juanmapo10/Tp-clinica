@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Turno, TurnoService } from '../../services/turno.service';
+import { HistoriaClinica, Turno, TurnoService } from '../../services/turno.service';
 import { AuthService, Usuario } from '../../services/auth.service';
 import { BehaviorSubject, Subscription, take } from 'rxjs';
 
@@ -33,6 +33,7 @@ export class AdminTurnosComponent implements OnInit{
   horariosDisponibles: string[] = [];
   fechaSeleccionada: Date | null = null;
   horarioSeleccionado: string | null = null;
+  historiasClinicas: HistoriaClinica[] = [];
 
   turnos: Turno[] = [];
   filtroEspecialidad: string = '';
@@ -65,11 +66,14 @@ export class AdminTurnosComponent implements OnInit{
     this.inicializarComponente();
     this.cargarUsuarios();
     this.cargarEspecialistas();
+    this.cargarHistoriasClinicas(); 
   }
 
   ngOnDestroy() {
     this.subscriptions.unsubscribe();
   }
+
+  
 
   private inicializarComponente() {
     const authSub = this.authService.currentUser$.subscribe(async user => {
@@ -99,6 +103,14 @@ export class AdminTurnosComponent implements OnInit{
     this.subscriptions.add(authSub);
   }
 
+  private async cargarHistoriasClinicas() {
+    try {
+      const historiasClinicas = await this.turnoService.getAllHistoriasClinicas().toPromise();
+      this.historiasClinicas = historiasClinicas || [];
+    } catch (error) {
+      console.error('Error al cargar historias clínicas:', error);
+    }
+  }
 
   seleccionarPaciente(paciente: Usuario) {
     this.pacienteSeleccionado = paciente;
@@ -349,15 +361,36 @@ export class AdminTurnosComponent implements OnInit{
   filtrarTurnos(): Turno[] {
     if (!this.turnos.length) return [];
     
+    const textoBusqueda = (this.filtroPaciente || '').toLowerCase().trim();
+    
+    if (!textoBusqueda) return this.turnos;
+  
     return this.turnos.filter(turno => {
-      const matchEspecialidad = !this.filtroEspecialidad || 
-        turno.especialidad.toLowerCase().includes(this.filtroEspecialidad.toLowerCase());
-      const matchEspecialista = !this.filtroPaciente || 
-        turno.paciente?.toLowerCase().includes(this.filtroPaciente.toLowerCase());
-      return matchEspecialidad && matchEspecialista;
+      // Búsqueda en campos básicos del turno
+      const matchBasico = 
+        turno.especialidad.toLowerCase().includes(textoBusqueda) ||
+        turno.especialista.toLowerCase().includes(textoBusqueda) ||
+        turno.paciente?.toLowerCase().includes(textoBusqueda) ||
+        turno.estado.toLowerCase().includes(textoBusqueda);
+  
+      // Búsqueda en historia clínica
+      const historiaClinica = this.historiasClinicas.find(hc => hc.turnoId === turno.id);
+      
+      const matchHistoriaClinica = historiaClinica ? (
+        // Búsqueda en datos generales
+        Object.values(historiaClinica.datosGenerales).some(valor => 
+          valor.toString().toLowerCase().includes(textoBusqueda)
+        ) ||
+        // Búsqueda en datos dinámicos
+        historiaClinica.datosDinamicos.some(dato => 
+          dato.clave.toLowerCase().includes(textoBusqueda) ||
+          dato.valor.toLowerCase().includes(textoBusqueda)
+        )
+      ) : false;
+  
+      return matchBasico || matchHistoriaClinica;
     });
   }
-
   async confirmarCancelacion(turnoId: string) {
     if (this.comentarioCancelacion.trim()) {
       await this.cancelarTurno(turnoId, this.comentarioCancelacion);

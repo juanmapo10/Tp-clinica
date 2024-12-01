@@ -236,7 +236,9 @@ h2 {
   .btn {
     width: 100%;
   }
-}/* Devolution Dialog Styles */
+}
+
+/* Devolution Dialog Styles */
 .devolucion-dialog {
   position: fixed;
   top: 50%;
@@ -276,26 +278,25 @@ h2 {
   flex-grow: 1;
 }
 
+/* Overlay for the entire screen */
 .overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0,0,0,0.5);
-  z-index: 999;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   animation: fadeIn 0.3s ease-out;
 }
 
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
-
 
 @media (max-width: 600px) {
   .devolucion-dialog {
@@ -304,6 +305,82 @@ h2 {
   }
 
   .devolucion-dialog .dialog-actions {
+    flex-direction: column;
+  }
+}
+
+/* Historia Clinica Dialog */
+.historia-clinica-dialog {
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  padding: 30px;
+  width: 90%;
+  max-width: 600px;
+  max-height: 80vh;
+  overflow-y: auto;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1100;
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+.historia-clinica-dialog h4 {
+  color: var(--primary-color);
+  border-bottom: 2px solid var(--secondary-color);
+  padding-bottom: 10px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.datos-generales, .datos-dinamicos {
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.datos-generales h5, .datos-dinamicos h5 {
+  color: #34495e;
+  margin-bottom: 15px;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  color: var(--primary-color);
+  margin-bottom: 5px;
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .historia-clinica-dialog {
+    width: 95%;
+    padding: 20px;
+  }
+
+  .input-group {
     flex-direction: column;
   }
 }
