@@ -1,55 +1,83 @@
 import { Component, OnInit } from '@angular/core';
 import { TurnoService } from '../../services/turno.service';
 import { AuthService, Usuario } from '../../services/auth.service';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { CommonModule } from '@angular/common';
+import { HistoriaClinica } from '../../services/turno.service';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-pacientes',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './pacientes.component.html',
   styleUrl: './pacientes.component.css'
 })
-export class PacientesComponente implements OnInit{
+export class PacientesComponente implements OnInit {
   currentUser$ = new BehaviorSubject<Usuario | null>(null);
+  historiasClinicas$: Observable<HistoriaClinica[]> | null = null;
+  especialistas: Usuario[] = [];
+  especialistaSeleccionado: string = '';
   
-  ngOnInit() {
-    this.inicializarComponente();
-    
-  }
-
+  // Tracks which clinical histories are expanded
+  expandedHistorias: { [key: string]: boolean } = {};
+  
   constructor(
-    private authService: AuthService
+    private authService: AuthService,
+    private turnoService: TurnoService
   ) {}
 
+  ngOnInit() {
+    this.inicializarComponente();
+    this.turnoService.getEspecialistas().subscribe(
+      especialistas => this.especialistas = especialistas
+    );
+  }
 
   private inicializarComponente() {
     this.authService.currentUser$.subscribe(async (user) => {
-      console.log('Estado de autenticación actualizado:', user?.email);
-      
       if (user) {
         try {
           const patientProfile = await this.authService.getCurrentPatientProfile();
-          
-          if (patientProfile) {
+          if (patientProfile && patientProfile.uid) {
             this.currentUser$.next(patientProfile);
-            console.log("Patient Profile:", this.currentUser$.value);
+            this.historiasClinicas$ = this.turnoService.getHistoriasClinicasPaciente(patientProfile.uid);
+            
+            // Initialize expanded state for each clinical history
+            this.historiasClinicas$.subscribe(historias => {
+              historias.forEach(historia => {
+                this.expandedHistorias[historia.uid] = false;
+              });
+            });
           } else {
-            console.warn('No patient profile found');
+            console.warn('Patient profile is incomplete');
             this.currentUser$.next(null);
+            this.historiasClinicas$ = null;
           }
         } catch (error) {
           console.error('Error fetching patient profile:', error);
           this.currentUser$.next(null);
+          this.historiasClinicas$ = null;
         }
       } else {
-        console.log('No hay usuario autenticado');
         this.currentUser$.next(null);
+        this.historiasClinicas$ = null;
       }
     });
   }
 
+  // Toggle method for expanding/collapsing clinical histories
+  toggleHistoriaExpanded(historiaUid: string) {
+    this.expandedHistorias[historiaUid] = !this.expandedHistorias[historiaUid];
+  }
 
-
+  async descargarHistoriasEspecialista() {
+    if (this.especialistaSeleccionado) {
+      try {
+        await this.turnoService.descargarHistoriasClinicasPorEspecialista(this.especialistaSeleccionado);
+      } catch (error) {
+        console.error('Error al descargar historias clínicas', error);
+      }
+    }
+  }
 }

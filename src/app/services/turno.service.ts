@@ -4,6 +4,9 @@ import { Observable, from } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { Usuario } from './auth.service';
 import { format } from 'date-fns';
+import { jsPDF } from 'jspdf';
+import 'jspdf-autotable';
+
 
 export interface Turno {
   id: string;
@@ -260,6 +263,60 @@ export class TurnoService {
     }
     
 
-    
+    getHistoriasClinicasPaciente(pacienteId: string): Observable<HistoriaClinica[]> {
+      const historiaClinicaRef = collection(this.firestore, 'historiaclinica');
+      const q = query(historiaClinicaRef, where('pacienteId', '==', pacienteId));
+      
+      return from(getDocs(q)).pipe(
+        map(snapshot => 
+          snapshot.docs.map(doc => ({
+            ...(doc.data() as HistoriaClinica),
+            documentId: doc.id,
+            fechaTurno: (doc.data() as any).fechaTurno?.toDate()
+          }))
+        )
+      );
+    }
 
+    async descargarHistoriasClinicasPorEspecialista(especialistaId: string): Promise<void> {
+      try {
+        const historiaClinicaRef = collection(this.firestore, 'historiaclinica');
+        const q = query(historiaClinicaRef, where('uid', '==', especialistaId));
+        const snapshot = await getDocs(q);
+        const historias = snapshot.docs.map(doc => {
+          const data = doc.data() as any;
+          return {
+            ...(doc.data() as HistoriaClinica),
+            documentId: doc.id,
+            fechaTurno: data.fechaTurno?.toDate ? data.fechaTurno.toDate() : data.fechaTurno
+          };
+        });
+    
+        const doc = new jsPDF();
+        doc.setFontSize(18);
+        doc.text('Historias Clínicas por Especialista', 14, 22);
+    
+        const tableData = historias.map(historia => [
+          historia.fechaTurno ? new Date(historia.fechaTurno).toLocaleDateString() : 'N/A',
+          historia.nombreEspecialista || 'N/A',
+          `${historia.datosGenerales.altura} cm`,
+          `${historia.datosGenerales.peso} kg`,
+          `${historia.datosGenerales.temperatura}°C`,
+          historia.datosGenerales.presion
+        ]);
+    
+        (doc as any).autoTable({
+          startY: 30,
+          head: [['Fecha', 'Especialista', 'Altura', 'Peso', 'Temperatura', 'Presión']],
+          body: tableData,
+          theme: 'striped'
+        });
+    
+        doc.save(`Historias_Clinicas_Especialista_${especialistaId}.pdf`);
+      } catch (error) {
+        console.error('Error al descargar historias clínicas:', error);
+        throw error;
+      }
+    }
+    
 }

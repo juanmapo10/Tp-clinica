@@ -1,43 +1,104 @@
 <div class="patient-profile-container" *ngIf="currentUser$ | async as paciente">
-    <div class="patient-header">
-      <i class="medical-icon">🩺</i>
-      <h2>Perfil del Paciente</h2>
+  <div class="patient-header">
+    <i class="medical-icon">🩺</i>
+    <h2>Perfil del Paciente</h2>
+  </div>
+  
+  <div class="patient-profile-content">
+    <div class="patient-info-grid">
+      <div class="patient-info-item">
+        <label>Nombre Completo</label>
+        <div class="value">{{ paciente.nombre }} {{ paciente.apellido }}</div>
+      </div>
+      
+      <div class="patient-info-item">
+        <label>Correo Electrónico</label>
+        <div class="value">{{ paciente.email }}</div>
+      </div>
+      
+      <div class="patient-info-item">
+        <label>Edad</label>
+        <div class="value">{{ paciente.edad }} años</div>
+      </div>
+      
+      <div class="patient-info-item">
+        <label>DNI</label>
+        <div class="value">{{ paciente.dni }}</div>
+      </div>
     </div>
     
-    <div class="patient-profile-content">
-      <div class="patient-info-grid">
-        <div class="patient-info-item">
-          <label>Nombre Completo</label>
-          <div class="value">{{ paciente.nombre }} {{ paciente.apellido }}</div>
-        </div>
-        
-        <div class="patient-info-item">
-          <label>Correo Electrónico</label>
-          <div class="value">{{ paciente.email }}</div>
-        </div>
-        
-        <div class="patient-info-item">
-          <label>Edad</label>
-          <div class="value">{{ paciente.edad }} años</div>
-        </div>
-        
-        <div class="patient-info-item">
-          <label>DNI</label>
-          <div class="value">{{ paciente.dni }}</div>
-        </div>
-      </div>
-      
-      <div class="patient-info-grid" *ngIf="paciente.obraSocial">
-        <div class="patient-info-item">
-          <label>Obra Social</label>
-          <div class="value">{{ paciente.obraSocial }}</div>
-        </div>
-      </div>
-      
-      <div class="patient-images" *ngIf="paciente.imagenes && paciente.imagenes.length > 0">
-        <img *ngFor="let imagen of paciente.imagenes" 
-             [src]="imagen" 
-             alt="Imagen de perfil del paciente">
+    <div class="patient-info-grid" *ngIf="paciente.obraSocial">
+      <div class="patient-info-item">
+        <label>Obra Social</label>
+        <div class="value">{{ paciente.obraSocial }}</div>
       </div>
     </div>
+    
+    <div class="patient-images" *ngIf="paciente.imagenes && paciente.imagenes.length > 0">
+      <img *ngFor="let imagen of paciente.imagenes" 
+           [src]="imagen" 
+           alt="Imagen de perfil del paciente">
+    </div>
   </div>
+  <div class="download-section">
+    <h3>Descargar Historias Clínicas por Especialista</h3>
+    
+    <select [(ngModel)]="especialistaSeleccionado">
+      <option value="">Seleccione un Especialista</option>
+      <option *ngFor="let especialista of especialistas" [value]="especialista.uid">
+        {{ especialista.nombre }} {{ especialista.apellido }}
+      </option>
+    </select>
+    
+    <button 
+      (click)="descargarHistoriasEspecialista()"
+      [disabled]="!especialistaSeleccionado"
+    >
+      Descargar PDF
+    </button>
+  </div>
+  <div class="clinical-history-section">
+    <h3>Historia Clínica</h3>
+    <ng-container *ngIf="historiasClinicas$ | async as historias">
+      
+      <div *ngIf="historias.length > 0; else noHistories" class="clinical-histories">
+        <div *ngFor="let historia of historias" class="clinical-history-item">
+          <div class="clinical-history-header" (click)="toggleHistoriaExpanded(historia.uid)">
+            <h4>Turno del {{ historia.fechaTurno | date:'dd/MM/yyyy' }}</h4>
+            <span class="toggle-icon">
+              {{ expandedHistorias[historia.uid] ? '▼' : '►' }}
+            </span>
+          </div>
+          
+          <div class="clinical-history-details" *ngIf="expandedHistorias[historia.uid]">
+            <p>Especialista: {{ historia.nombreEspecialista }}</p>
+            
+            <div class="general-data">
+              <strong>Datos Generales:</strong>
+              <ul>
+                <li>Altura: {{ historia.datosGenerales.altura }} cm</li>
+                <li>Peso: {{ historia.datosGenerales.peso }} kg</li>
+                <li>Temperatura: {{ historia.datosGenerales.temperatura }}°C</li>
+                <li>Presión: {{ historia.datosGenerales.presion }}</li>
+              </ul>
+            </div>
+
+            <div class="dynamic-data" *ngIf="historia.datosDinamicos && historia.datosDinamicos.length > 0">
+              <strong>Información Adicional:</strong>
+              <ul>
+                <li *ngFor="let dato of historia.datosDinamicos">
+                  {{ dato.clave }}: {{ dato.valor }}
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+      <ng-template #noHistories>
+        <p>No se han encontrado registros de historia clínica.</p>
+      </ng-template>
+    </ng-container>
+  </div>
+</div>
+
+<!-- Download section remains the same -->
