@@ -1,10 +1,20 @@
 import { Injectable } from '@angular/core';
 import { Auth, createUserWithEmailAndPassword, onAuthStateChanged, sendEmailVerification, signInWithEmailAndPassword, signOut, User } from '@angular/fire/auth';
-import { Firestore, addDoc, collection, getDocs, doc, setDoc, getDoc, where, query } from '@angular/fire/firestore';
+import { Firestore, addDoc, collection, getDocs, doc, setDoc, getDoc, where, query, deleteDoc } from '@angular/fire/firestore';
 import { Storage, ref, uploadBytes, getDownloadURL } from '@angular/fire/storage';
 import { Router } from '@angular/router';
 import { BehaviorSubject, Observable, from } from 'rxjs';
 import { map } from 'rxjs/operators';
+
+export interface LoginLog {
+  userId?: string;
+  email: string;
+  userType?: string;
+  timestamp: Date;
+  loginSuccess: boolean;
+  errorMessage?: string;
+  apellido?: string;
+}
 
 export interface Usuario {
   nombre: string;
@@ -94,7 +104,7 @@ export class AuthService {
     });
   }
 
-  async registrarUsuario(usuario: Usuario, password: string, imagenes: File[], diasDisponibles?: string[], horariosDisponibles?: string[]): Promise<void> {
+  async registrarUsuario(usuario: Usuario, password: string, imagenes: File[], diasDisponibles?: string[], horariosDisponibles?: string[], recaptchaToken?: string): Promise<void> {
     try {
       const userCredential = await createUserWithEmailAndPassword(this.auth, usuario.email, password);
       
@@ -156,23 +166,55 @@ export class AuthService {
       if (!userCredential.user.emailVerified) {
         throw new Error('Email del usuario no verificado');
       }
-
+  
       const userDoc = await getDoc(doc(this.firestore, `usuarios/${userCredential.user.uid}`));
       const userData = userDoc.data() as Usuario;
-
+  
       if (userData.tipo === 'especialista' && !userData.aprobado) {
         throw new Error('usuario no aprobado');
       }
+      const loginLogsRef = collection(this.firestore, 'login_logs');
+      await addDoc(loginLogsRef, {
+        userId: userCredential.user.uid,
+        email: userCredential.user.email,
+        apellido :userData.apellido,
+        userType: userData.tipo,
+        timestamp: new Date(),
+        loginSuccess: true
+      });
+  
       await this.redirectBasedOnUserType(userData.tipo);
     } catch (error: any) {
+      const loginLogsRef = collection(this.firestore, 'login_logs');
+      await addDoc(loginLogsRef, {
+        email: email,
+        timestamp: new Date(),
+        loginSuccess: false,
+        errorMessage: error.message
+      });
+  
       console.error('Error en el login:', error);
       throw error;
-    }
-  }
+    }}
 
   getUsuarios(): Observable<Usuario[]> {
     const usuariosRef = collection(this.firestore, 'usuarios');
     return from(getDocs(usuariosRef)).pipe(
+      map(snapshot => {
+        return snapshot.docs.map(doc => {
+          const data = doc.data() as Usuario;
+          return {
+            ...data,
+            uid: doc.id  
+          };
+        });
+      })
+    );
+  }
+  getPacientes(): Observable<Usuario[]> {
+    const usuariosRef = collection(this.firestore, 'usuarios');
+    const q = query(usuariosRef, where('tipo', '==', "paciente"));
+    return from(getDocs(q)).pipe(
       map(snapshot => {
         return snapshot.docs.map(doc => {
           const data = doc.data() as Usuario;
@@ -294,6 +336,51 @@ export class AuthService {
     }
   }
 
+  async eliminarUsuario(uid: string): Promise<void> {
+    try {
+      const usuarioRef = doc(this.firestore, `usuarios/${uid}`);
+      await deleteDoc(usuarioRef);
+      console.log('Usuario eliminado correctamente.');
+    } catch (error) {
+      console.error('Error al eliminar usuario:', error);
+      throw error;
+    }
+  }
+  
+  obtenerEspecialistas(): Observable<Usuario[]> {
+    const usuariosRef = collection(this.firestore, 'usuarios');
+    const q = query(usuariosRef, where('tipo', '==', 'especialista'), where('aprobado', '==', true));
+    
+    return from(getDocs(q)).pipe(
+      map(snapshot => {
+        return snapshot.docs.map(doc => {
+          const data = doc.data() as Usuario;
+          return {
+            ...data,
+            uid: doc.id
+          };
+        });
+      })
+    );
+  }
+  
+  getLoginLogs(): Observable<LoginLog[]> {
+    const loginLogsRef = collection(this.firestore, 'login_logs');
+    
+    return from(getDocs(loginLogsRef)).pipe(
+      map(snapshot => {
+        return snapshot.docs.map(doc => {
+          const data = doc.data() as LoginLog;
+          return {
+            ...data,
+            timestamp: data.timestamp && (data.timestamp as any).toDate 
+              ? (data.timestamp as any).toDate() 
+              : new Date(data.timestamp)
+          };
+        }).sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+      })
+    );
+  }
 
 }
 

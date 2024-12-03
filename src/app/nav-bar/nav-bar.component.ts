@@ -5,6 +5,7 @@ import { User } from '@angular/fire/auth';
 import { Observable } from 'rxjs';
 import { CommonModule } from '@angular/common';
 
+
 @Component({
   selector: 'app-nav-bar',
   standalone: true,
@@ -82,5 +83,15 @@ export class NavBarComponent implements OnInit {
   await this.router.navigate(['/home']);
   }
 
-
+  async navegarPacientes()
+  {
+  await this.router.navigate(['/pacientes-especialista']);
+  }
+  
+  async navegarEstadisticas()
+  {
+    await this.router.navigate(['/estadisticas']);
+  }
+  
+  
 }

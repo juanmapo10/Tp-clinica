@@ -5,6 +5,8 @@ export const environment = {
   projectId: "clinicaa",
   storageBucket: "clinicaa.firebasestorage.app",
   messagingSenderId: "397294440823",
-  appId: "1:397294440823:web:24d72d76a8c3e2dc55d172"
+  appId: "1:397294440823:web:24d72d76a8c3e2dc55d172",
+  recaptchaSiteKey: 'YOUR_RECAPTCHA_V3_SITE_KEY',
       }
   };
+  

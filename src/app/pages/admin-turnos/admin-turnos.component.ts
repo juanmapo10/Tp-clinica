@@ -1,6 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { 
+  trigger, 
+  state, 
+  style, 
+  animate, 
+  transition 
+} from '@angular/animations';
 import { HistoriaClinica, Turno, TurnoService } from '../../services/turno.service';
 import { AuthService, Usuario } from '../../services/auth.service';
 import { BehaviorSubject, Subscription, take } from 'rxjs';
@@ -8,9 +15,47 @@ import { BehaviorSubject, Subscription, take } from 'rxjs';
 @Component({
   selector: 'app-admin-turnos',
   standalone: true,
-  imports: [CommonModule,FormsModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './admin-turnos.component.html',
-  styleUrl: './admin-turnos.component.css'
+  styleUrl: './admin-turnos.component.css',
+  animations: [
+    trigger('slideInOut', [
+      transition(':enter', [
+        style({ 
+          opacity: 0, 
+          transform: 'translateY(50px)' 
+        }),
+        animate('600ms cubic-bezier(0.25, 0.1, 0.25, 1)', 
+          style({ 
+            opacity: 1, 
+            transform: 'translateY(0)' 
+          })
+        )
+      ])
+    ]),
+    trigger('listAnimation', [
+      transition(':enter', [
+        style({ 
+          opacity: 0, 
+          transform: 'translateY(20px)' 
+        }),
+        animate('500ms ease-out', 
+          style({ 
+            opacity: 1, 
+            transform: 'translateY(0)' 
+          })
+        )
+      ]),
+      transition(':leave', [
+        animate('300ms ease-in', 
+          style({ 
+            opacity: 0, 
+            transform: 'translateY(-20px)' 
+          })
+        )
+      ])
+    ])
+  ]
 })
 export class AdminTurnosComponent implements OnInit{
 

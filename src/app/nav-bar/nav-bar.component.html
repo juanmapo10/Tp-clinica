@@ -52,6 +52,16 @@
                 <i class="bi bi-people"></i> Usuarios
               </a>
             </li>
+            <li *ngIf="tipoUsuario === 'especialista'">
+              <a class="dropdown-item" (click)="navegarPacientes()">
+                <i class="bi bi-people"></i> Pacientes
+              </a>
+            </li>
+            <li *ngIf="tipoUsuario === 'admin'">
+              <a class="dropdown-item" (click)="navegarEstadisticas()">
+                <i class="bi bi-bar-chart-fill"></i> Estadísticas
+              </a>
+            </li>            
             <li><hr class="dropdown-divider"></li>
             <li>
               <a class="dropdown-item" href="#" (click)="logout()">

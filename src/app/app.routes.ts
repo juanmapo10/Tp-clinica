@@ -12,6 +12,7 @@ import {MishorariosComponent} from './mishorarios/mishorarios.component'
 import { AdminTurnosComponent } from './pages/admin-turnos/admin-turnos.component'
 import { AdministradorComponent } from './pefiles/administrador/administrador.component'
 import { PacientesComponent } from './especialista/pacientes/pacientes.component'
+import { EstadisticasComponent } from './estadisticas/estadisticas.component';
 
 export const routes: Routes = [
     { path: 'home', component: HomeComponent },
@@ -27,4 +28,5 @@ export const routes: Routes = [
     {path : 'admin-turnos', component : AdminTurnosComponent},
     {path : 'perfiles-admin', component : AdministradorComponent},
     {path : 'pacientes-especialista', component : PacientesComponent},
+    {path : 'estadisticas', component : EstadisticasComponent }
 ];

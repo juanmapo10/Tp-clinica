@@ -1,1 +1,112 @@
-<p>pacientes works!</p>
+  
+
+    
+        <div class="card patient-list-container">
+            <div class="card-header">
+              <h3>Pacientes</h3>
+            </div>
+            <div class="card-body">
+               <div *ngIf="(pacientesAtendidos$ | async) as pacientes" class="row">
+                <div 
+                  *ngFor="let paciente of pacientes" 
+                  class="col-md-4 col-sm-6 mb-3"
+                >
+                  <div class="card patient-item" (click)="seleccionarPaciente(paciente)">
+                    <div class="card-body d-flex align-items-center">
+                      <img 
+                        *ngIf="paciente.imagenes && paciente.imagenes.length > 0" 
+                        [src]="paciente.imagenes[0]" 
+                        class="rounded-circle me-3" 
+                        style="width: 50px; height: 50px; object-fit: cover;"
+                      >
+                      <span class="patient-name">{{paciente.nombre}} {{paciente.apellido}}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div *ngIf="pacienteSeleccionado" class="modal fade show" tabindex="-1" style="display: block;">
+            <div class="modal-dialog modal-lg">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title">
+                    Detalles de Turnos de {{pacienteSeleccionado.nombre}} {{pacienteSeleccionado.apellido}}
+                  </h5>
+                  <button type="button" class="btn-close" (click)="cerrarDetallePaciente()"></button>
+                </div>
+                <div class="modal-body">
+                  <table *ngIf="turnosPaciente.length > 0" class="table table-striped">
+                    <thead>
+                      <tr>
+                        <th>Fecha</th>
+                        <th>Especialidad</th>
+                        <th>Especialista</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr *ngFor="let turno of turnosPaciente">
+                        <td>{{turno.fecha | date:'dd/MM/yyyy'}}</td>
+                        <td>{{turno.especialidad}}</td>
+                        <td>{{turno.especialista}}</td>
+                        <td>{{turno.estado}}</td>
+                        <button 
+                        class="btn btn-success" 
+                        (click)="verResena(turno)">
+                        Ver Reseña
+                      </button>
+                      </tr>
+                    </tbody>
+                  </table>
+                
+                  <p *ngIf="turnosPaciente.length === 0" class="text-center text-muted">
+                    No hay turnos registrados para este paciente.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div *ngIf="dialogoResena" class="modal fade show" tabindex="-1" style="display: block;">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h4 class="modal-title">
+                    {{ modoLecturaResena ? 'Reseña' : 'Escribir Reseña' }}
+                  </h4>
+                  <button (click)="cerrarDialogoResena()" class="btn-close"></button>
+                </div>
+                <div class="modal-body">
+                  <textarea 
+                    *ngIf="!modoLecturaResena" 
+                    [(ngModel)]="textoResena" 
+                    class="form-control" 
+                    rows="5" 
+                    placeholder="Escribe tu reseña aquí..."
+                  ></textarea>
+                  
+                  <p *ngIf="modoLecturaResena" class="review-text">
+                    {{ textoResena }}
+                  </p>
+                </div>
+                <div class="modal-footer">
+                  <button 
+                    *ngIf="!modoLecturaResena" 
+                    (click)="guardarResena()" 
+                    class="btn btn-primary"
+                    [disabled]="!textoResena.trim()"
+                  >
+                    Guardar Reseña
+                  </button>
+                  <button 
+                    (click)="cerrarDialogoResena()" 
+                    class="btn btn-secondary"
+                  >
+                    Cerrar
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>

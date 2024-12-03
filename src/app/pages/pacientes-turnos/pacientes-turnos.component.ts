@@ -41,6 +41,7 @@ export class PacientesTurnosComponent implements OnInit, OnDestroy {
   mostrarEncuesta: string | null = null;
   comentarioCancelacion: string = '';
   calificacionSeleccionada: number | null = null;
+  
   dialogoResena: Turno | null = null;
   textoResena: string = '';
   modoLecturaResena: boolean = false;

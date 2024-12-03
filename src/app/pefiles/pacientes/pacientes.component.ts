@@ -19,7 +19,6 @@ export class PacientesComponente implements OnInit {
   especialistas: Usuario[] = [];
   especialistaSeleccionado: string = '';
   
-  // Tracks which clinical histories are expanded
   expandedHistorias: { [key: string]: boolean } = {};
   
   constructor(
@@ -42,8 +41,7 @@ export class PacientesComponente implements OnInit {
           if (patientProfile && patientProfile.uid) {
             this.currentUser$.next(patientProfile);
             this.historiasClinicas$ = this.turnoService.getHistoriasClinicasPaciente(patientProfile.uid);
-            
-            // Initialize expanded state for each clinical history
+          
             this.historiasClinicas$.subscribe(historias => {
               historias.forEach(historia => {
                 this.expandedHistorias[historia.uid] = false;
@@ -66,7 +64,6 @@ export class PacientesComponente implements OnInit {
     });
   }
 
-  // Toggle method for expanding/collapsing clinical histories
   toggleHistoriaExpanded(historiaUid: string) {
     this.expandedHistorias[historiaUid] = !this.expandedHistorias[historiaUid];
   }

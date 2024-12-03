@@ -6,7 +6,7 @@ import { Usuario } from './auth.service';
 import { format } from 'date-fns';
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
-
+import * as XLSX from 'xlsx';
 
 export interface Turno {
   id: string;
@@ -293,8 +293,12 @@ export class TurnoService {
         });
     
         const doc = new jsPDF();
+        const faviconBase64 = 'favicon.ico'; 
+        doc.addImage(faviconBase64, 'PNG', 10, 10, 20, 20);
         doc.setFontSize(18);
-        doc.text('Historias Clínicas por Especialista', 14, 22);
+        doc.text('Historias Clínicas por Especialista', 40, 22);
+        doc.setFontSize(10);
+        doc.text(`Fecha de emisión: ${new Date().toLocaleDateString('es-AR')}`, 14, 35);
     
         const tableData = historias.map(historia => [
           historia.fechaTurno ? new Date(historia.fechaTurno).toLocaleDateString() : 'N/A',
@@ -306,7 +310,7 @@ export class TurnoService {
         ]);
     
         (doc as any).autoTable({
-          startY: 30,
+          startY: 45, 
           head: [['Fecha', 'Especialista', 'Altura', 'Peso', 'Temperatura', 'Presión']],
           body: tableData,
           theme: 'striped'
@@ -319,4 +323,95 @@ export class TurnoService {
       }
     }
     
+
+    exportTurnosToExcel(turnos: Turno[], filename: string = 'turnos') {
+      const exportData = turnos.map(turno => ({
+        'ID': turno.id,
+        'Paciente': turno.paciente || 'N/A',
+        'Especialista': turno.especialista,
+        'Especialidad': turno.especialidad,
+        'Fecha': turno.fechaFormateada || (turno.fecha ? this.formatDate(turno.fecha) : 'N/A'),
+        'Horario': turno.horario || 'N/A',
+        'Estado': turno.estado,
+        'Comentario': turno.comentario || 'N/A',
+        'Calificación': turno.calificacion || 'N/A'
+      }));
+  
+      const worksheet = XLSX.utils.json_to_sheet(exportData);
+  
+
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'Turnos');
+      XLSX.writeFile(workbook, `${filename}_${new Date().toISOString().split('T')[0]}.xlsx`);
+    }
+    private formatDate(date: Date): string {
+      return date.toLocaleDateString('es-AR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      });
+    }
+
+    async getTurnosPorEspecialidad(): Promise<{ especialidad: string, cantidad: number }[]> {
+      const turnos = await this.getAllTurnos().toPromise() || [];
+      const especialidadCounts = turnos.reduce((acc, turno) => {
+        if (turno.especialidad) {
+          acc[turno.especialidad] = (acc[turno.especialidad] || 0) + 1;
+        }
+        return acc;
+      }, {} as { [key: string]: number });
+    
+      return Object.entries(especialidadCounts).map(([especialidad, cantidad]) => ({
+        especialidad,
+        cantidad
+      }));
+    }
+    
+    async getTurnosPorDia(): Promise<{ fecha: Date, cantidad: number }[]> {
+      const turnos = await this.getAllTurnos().toPromise() || [];
+      const fechaCounts = turnos.reduce((acc, turno) => {
+        if (turno.fecha) {
+          const fechaKey = turno.fecha.toDateString();
+          acc[fechaKey] = (acc[fechaKey] || 0) + 1;
+        }
+        return acc;
+      }, {} as { [key: string]: number });
+    
+      return Object.entries(fechaCounts).map(([fechaStr, cantidad]) => ({
+        fecha: new Date(fechaStr),
+        cantidad
+      }));
+    }
+    
+    async getTurnosPorMedico(especialistaId: string, desde: Date, hasta: Date): Promise<number> {
+      const turnos = await this.getAllTurnos().toPromise() || [];
+      return turnos.filter(turno => 
+        turno.especialistaId === especialistaId && 
+        turno.fecha && 
+        turno.fecha >= desde && 
+        turno.fecha <= hasta
+      ).length;
+    }
+    
+    async getTurnosSolicitadosPorMedico(especialistaId: string, desde: Date, hasta: Date): Promise<Turno[]> {
+      const turnos = await this.getAllTurnos().toPromise() || [];
+      return turnos.filter(turno => 
+        turno.especialistaId === especialistaId && 
+        turno.fecha && 
+        turno.fecha >= desde && 
+        turno.fecha <= hasta &&
+        turno.estado === 'pendiente'
+      );
+    }
+    
+    async getTurnosFinalizadosPorMedico(especialistaId: string, desde: Date, hasta: Date): Promise<Turno[]> {
+      const turnos = await this.getAllTurnos().toPromise() || [];
+      return turnos.filter(turno => 
+        turno.especialistaId === especialistaId && 
+        turno.fecha && 
+        turno.fecha >= desde && 
+        turno.fecha <= hasta &&
+        turno.estado === 'realizado'
+      );
+    }
 }

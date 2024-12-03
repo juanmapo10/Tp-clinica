@@ -1,0 +1,107 @@
+<!--- estadisticas.component.html -->
+<div class="statistics-dashboard">
+    <div class="controls-container">
+      <div class="filter-section">
+        <button class="toggle-filters" (click)="toggleFilters()">
+          Filtros <i class="icon">▼</i>
+        </button>
+        
+        <div class="filters" [class.hidden]="!showFilters">
+          <div class="filter-group">
+            <label for="especialista-select">Especialista:</label>
+            <select 
+              id="especialista-select" 
+              (change)="onEspecialistaChange($event)" 
+              [(ngModel)]="especialistaSeleccionadoId" 
+              class="filter-select"
+            >
+              <option *ngFor="let especialista of especialistas$ | async" [value]="especialista.uid">
+                {{ especialista.nombre }}
+              </option>
+            </select>
+          </div>
+          
+          <div class="filter-group">
+            <label for="fecha-desde">Desde:</label>
+            <input 
+              type="date" 
+              id="fecha-desde" 
+              [(ngModel)]="fechaDesde" 
+              class="filter-date"
+            >
+          </div>
+          
+          <div class="filter-group">
+            <label for="fecha-hasta">Hasta:</label>
+            <input 
+              type="date" 
+              id="fecha-hasta" 
+              [(ngModel)]="fechaHasta" 
+              class="filter-date"
+            >
+          </div>
+        </div>
+      </div>
+      
+      <div class="export-buttons">
+        <button (click)="exportToExcel()" class="export-btn excel-btn">
+          Excel
+        </button>
+        <button (click)="exportToPdf()" class="export-btn pdf-btn">
+          PDF
+        </button>
+      </div>
+    </div>
+  
+    <div class="charts-container">
+      <div class="chart-panel">
+        <div class="chart-header" (click)="toggleChart('especialidad')">
+          <h3>Turnos por Especialidad</h3>
+          <i class="toggle-icon">{{ chartStates.especialidad ? '▲' : '▼' }}</i>
+        </div>
+        <div class="chart-content" [class.hidden]="!chartStates.especialidad">
+          <canvas id="turnosPorEspecialidadChart"></canvas>
+        </div>
+      </div>
+  
+      <div class="chart-panel">
+        <div class="chart-header" (click)="toggleChart('dia')">
+          <h3>Turnos por Día</h3>
+          <i class="toggle-icon">{{ chartStates.dia ? '▲' : '▼' }}</i>
+        </div>
+        <div class="chart-content" [class.hidden]="!chartStates.dia">
+          <canvas id="turnosPorDiaChart"></canvas>
+        </div>
+      </div>
+  
+      <div class="chart-panel">
+        <div class="chart-header" (click)="toggleChart('medico')">
+          <h3>Turnos por Especialista</h3>
+          <i class="toggle-icon">{{ chartStates.medico ? '▲' : '▼' }}</i>
+        </div>
+        <div class="chart-content" [class.hidden]="!chartStates.medico">
+          <canvas id="turnosPorMedicoChart"></canvas>
+        </div>
+      </div>
+  
+      <div class="chart-panel">
+        <div class="chart-header" (click)="toggleChart('solicitados')">
+          <h3>Turnos Solicitados</h3>
+          <i class="toggle-icon">{{ chartStates.solicitados ? '▲' : '▼' }}</i>
+        </div>
+        <div class="chart-content" [class.hidden]="!chartStates.solicitados">
+          <canvas id="turnosSolicitadosPorMedicoChart"></canvas>
+        </div>
+      </div>
+  
+      <div class="chart-panel">
+        <div class="chart-header" (click)="toggleChart('finalizados')">
+          <h3>Turnos Finalizados</h3>
+          <i class="toggle-icon">{{ chartStates.finalizados ? '▲' : '▼' }}</i>
+        </div>
+        <div class="chart-content" [class.hidden]="!chartStates.finalizados">
+          <canvas id="turnosFinalizadosPorMedicoChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>

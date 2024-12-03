@@ -1,4 +1,4 @@
-<div class="container-fluid patient-appointments p-4 bg-light">
+<div class="container-fluid patient-appointments p-4 bg-light"[@slideInOut]>
     <div class="card shadow-sm">
       <div class="card-header bg-primary text-white">
         <h2 class="mb-0">
@@ -141,7 +141,7 @@
       class="form-control">
     </div>
 
-    <ul class="turnos-list">
+    <ul class="turnos-list"[@listAnimation]>
       <li *ngFor="let turno of filtrarTurnos()" class="turno-item">
         <div class="turno-info">
           <span class="estado" [attr.data-estado]="turno.estado">Estado: {{ turno.estado }}</span>
