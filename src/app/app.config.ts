@@ -7,7 +7,7 @@ import { getFirestore, provideFirestore } from '@angular/fire/firestore';
 import { getDatabase, provideDatabase } from '@angular/fire/database';
 import { getStorage, provideStorage } from '@angular/fire/storage';
 import { provideAnimations } from '@angular/platform-browser/animations';
-
+import { HttpClient } from '@angular/common/http'; 
 
 export const appConfig: ApplicationConfig = {
   providers: 
@@ -25,6 +25,7 @@ export const appConfig: ApplicationConfig = {
        provideFirestore(() => getFirestore()), 
        provideDatabase(() => getDatabase()), 
        provideStorage(() => getStorage()),
+       
        
       ]
 };

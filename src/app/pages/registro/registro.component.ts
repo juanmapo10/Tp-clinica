@@ -5,6 +5,11 @@ import { AuthService, Usuario } from '../../services/auth.service';
 import { Observable } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { emailVerified } from '@angular/fire/auth-guard';
+import { PasswordStrengthDirective } from '../../directive/password-strength.directive';
+import { ImagePreviewDirective } from '../../directive/image-preview.directive';
+import { CustomValidatorDirective } from '../../directive/custom-validator.directive';
+import { RECAPTCHA_SETTINGS, RecaptchaModule, RecaptchaSettings } from 'ng-recaptcha';
+
 
 @Component({
   selector: 'app-registro',
@@ -13,7 +18,10 @@ import { emailVerified } from '@angular/fire/auth-guard';
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    FormsModule
+    FormsModule,
+    PasswordStrengthDirective,
+    ImagePreviewDirective,
+    CustomValidatorDirective
   ],
   styleUrls: ['./registro.component.css']
 })

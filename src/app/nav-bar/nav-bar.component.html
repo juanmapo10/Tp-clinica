@@ -1,13 +1,12 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
   <div class="container">
-    <a class="navbar-brand" routerLink="/">Clinica</a>
+    <a class="navbar-brand" >Clinica</a>
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
       <span class="navbar-toggler-icon"></span>
     </button>
 
     <div class="collapse navbar-collapse" id="navbarContent">
-      <!-- Menú para usuario no autenticado -->
       <ul class="navbar-nav ms-auto" *ngIf="!(user$ | async)">
         <li class="nav-item">
           <a class="nav-link" routerLink="/registro">Registro</a>
@@ -17,14 +16,11 @@
         </li>
       </ul>
 
-      <!-- Menú para usuario autenticado -->
       <ul class="navbar-nav ms-auto" *ngIf="user$ | async as user">
-        <!-- Elementos comunes del menú -->
         <li class="nav-item">
           <a class="nav-link">Bienvenido, {{user.email}}</a>
         </li>
-        
-        <!-- Menú desplegable -->
+
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown">
             <i class="bi bi-person-circle"></i>

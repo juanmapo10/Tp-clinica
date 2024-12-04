@@ -3,6 +3,9 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { CapitalizePipe } from '../../capitalize.pipe';
+import { FormatTimePipe } from '../../format-time.pipe';
+import { EmailDomainPipe, } from '../../mask-email.pipe';
 
 @Component({
   selector: 'app-login',
@@ -10,7 +13,10 @@ import { AuthService } from '../../services/auth.service';
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    RouterLink
+    RouterLink,
+    EmailDomainPipe,
+    CapitalizePipe,
+    FormatTimePipe
   ],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css']
@@ -19,6 +25,7 @@ export class LoginComponent {
   loginForm: FormGroup;
   error: string = '';
   loading: boolean = false;
+  tiempoDeCarga: number = 0; 
   usuariosRapidos = [
     { email: 'juanmanuelportela2@gmail.com', tipo: 'admin' },
     { email: 'sonahi5212@edectus.com', tipo: 'paciente' },
@@ -38,6 +45,7 @@ export class LoginComponent {
 
   async onSubmit() {
     if (this.loginForm.valid) {
+      const startTime = performance.now();
       this.loading = true;
       this.error = '';
       
@@ -46,11 +54,11 @@ export class LoginComponent {
           this.loginForm.get('email')?.value,
           this.loginForm.get('password')?.value
         );
-
       } catch (error: any) {
         this.error = this.getErrorMessage(error.code);
       } finally {
         this.loading = false;
+        this.tiempoDeCarga = performance.now() - startTime;
       }
     }
   }

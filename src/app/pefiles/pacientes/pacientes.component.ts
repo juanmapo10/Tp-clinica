@@ -5,11 +5,14 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { HistoriaClinica } from '../../services/turno.service';
 import { FormsModule } from '@angular/forms';
+import { SeguridadDirective } from '../../seguridad.directive';
 
 @Component({
   selector: 'app-pacientes',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule,
+    SeguridadDirective,
+   ],
   templateUrl: './pacientes.component.html',
   styleUrl: './pacientes.component.css'
 })
@@ -62,6 +65,7 @@ export class PacientesComponente implements OnInit {
         this.historiasClinicas$ = null;
       }
     });
+    
   }
 
   toggleHistoriaExpanded(historiaUid: string) {
