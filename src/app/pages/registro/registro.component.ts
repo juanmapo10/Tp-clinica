@@ -27,7 +27,7 @@ import { RECAPTCHA_SETTINGS, RecaptchaModule, RecaptchaSettings } from 'ng-recap
     {
       provide: RECAPTCHA_SETTINGS,
       useValue: {
-        siteKey: '6LeKc3UqAAAAABMGD1bJ5u0ZfPEu3zGS-zlW5bRG',
+        siteKey: '6LfJopIqAAAAAHZgtOdJpXdVgUDw14_RWEnmuwUH',
       } as RecaptchaSettings,
     },
   ],
