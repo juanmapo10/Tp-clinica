@@ -30,6 +30,7 @@ export interface Usuario {
   uid?: string;
   dias? : string[];
   horarios? : string[];
+  
 }
 export interface Horarios {
   especialistaUid: string;

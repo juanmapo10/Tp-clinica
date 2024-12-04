@@ -21,7 +21,15 @@ import { RECAPTCHA_SETTINGS, RecaptchaModule, RecaptchaSettings } from 'ng-recap
     FormsModule,
     PasswordStrengthDirective,
     ImagePreviewDirective,
-    CustomValidatorDirective
+    CustomValidatorDirective,
+    RecaptchaModule
+  ], providers: [
+    {
+      provide: RECAPTCHA_SETTINGS,
+      useValue: {
+        siteKey: '6LeKc3UqAAAAABMGD1bJ5u0ZfPEu3zGS-zlW5bRG',
+      } as RecaptchaSettings,
+    },
   ],
   styleUrls: ['./registro.component.css']
 })
@@ -56,6 +64,7 @@ export class RegistroComponent implements OnInit {
       obraSocial: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]],
+      recaptcha: ['', Validators.required]
     });
   }
   private crearFormularioEspecialista(): FormGroup {
@@ -70,6 +79,7 @@ export class RegistroComponent implements OnInit {
       cuentaVerificado: false,
       dias: [[], Validators.required], 
       horarios: [[], Validators.required], 
+      recaptcha: ['', Validators.required]
     });
   }
   cambiarTipoUsuario(tipo: 'paciente' | 'especialista') {
@@ -147,6 +157,7 @@ export class RegistroComponent implements OnInit {
   }
   async onSubmit() {
     if (this.registroForm.valid && this.validarImagenes()) {
+      
       this.cargando = true;
       this.mensajeError = '';
       this.mensajeExito = '';
@@ -204,6 +215,12 @@ export class RegistroComponent implements OnInit {
     return true;
   }
 
-
+  onRecaptchaResolved(token: string | null) {
+    this.registroForm.patchValue({ recaptcha: token });
+  }
+  
+  onRecaptchaExpired() {
+    this.registroForm.patchValue({ recaptcha: null });
+  }
   
 }

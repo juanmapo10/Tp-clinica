@@ -52,7 +52,7 @@
                               (click)="toggleAprobacion(usuario)">
                         {{usuario.aprobado ? 'Deshabilitar' : 'Habilitar'}}
                       </button>
-                      <button (click)="eliminarUsuario(usuario.uid!)" class="btn btn-danger btn-sm ms-2">
+                      <button (click)="mostrarModalEliminar(usuario)" class="btn btn-danger btn-sm ms-2">
                         Eliminar
                       </button>
                     </div>
@@ -248,6 +248,46 @@
           </tr>
         </tbody>
       </table>
+    </div>
+  </div>
+</div>
+
+<div 
+  *ngIf="usuarioAEliminar" 
+  class="modal fade show" 
+  tabindex="-1" 
+  style="display: block; background-color: rgba(0,0,0,0.5);"
+>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Confirmar Eliminación</h5>
+        <button 
+          type="button" 
+          class="btn-close" 
+          (click)="cancelarEliminacion()"
+        ></button>
+      </div>
+      <div class="modal-body">
+        ¿Estás seguro de que deseas eliminar al usuario 
+        <strong>{{usuarioAEliminar.nombre}} {{usuarioAEliminar.apellido}}</strong>?
+      </div>
+      <div class="modal-footer">
+        <button 
+          type="button" 
+          class="btn btn-secondary" 
+          (click)="cancelarEliminacion()"
+        >
+          Cancelar
+        </button>
+        <button 
+          type="button" 
+          class="btn btn-danger" 
+          (click)="confirmarEliminacion()"
+        >
+          Eliminar
+        </button>
+      </div>
     </div>
   </div>
 </div>

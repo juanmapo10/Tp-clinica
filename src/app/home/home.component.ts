@@ -54,6 +54,7 @@ export class HomeComponent implements OnInit {
   favoritoPacientes: {[key: string]: boolean} = {};
   loginLogs: LoginLog[] = [];
   showLoginLogs = false;
+  usuarioAEliminar: Usuario | null = null;
 
   constructor(
     private fb: FormBuilder,
@@ -231,5 +232,29 @@ export class HomeComponent implements OnInit {
 
   toggleLoginLogs() {
     this.showLoginLogs = !this.showLoginLogs;
+  }
+
+  mostrarModalEliminar(usuario: Usuario) {
+    this.usuarioAEliminar = usuario;
+  }
+
+  cancelarEliminacion() {
+    this.usuarioAEliminar = null;
+  }
+
+  async confirmarEliminacion() {
+    if (this.usuarioAEliminar) {
+      try {
+        await this.authService.eliminarUsuario(this.usuarioAEliminar.uid!);
+        this.usuarios = this.usuarios.filter(usuario => usuario.uid !== this.usuarioAEliminar!.uid);
+        this.mensajeExito = 'Usuario eliminado exitosamente';
+        setTimeout(() => (this.mensajeExito = ''), 3000);
+        
+        // Close the modal
+        this.usuarioAEliminar = null;
+      } catch (error) {
+        this.mensajeError = 'Error al eliminar usuario';
+      }
+    }
   }
 }

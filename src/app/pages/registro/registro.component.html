@@ -226,7 +226,12 @@
               >
             </div>
             
-            
+            <div class="mb-3">
+              <re-captcha 
+                (resolved)="onRecaptchaResolved($event)"
+                (expired)="onRecaptchaExpired()"
+              ></re-captcha>
+            </div>
             
             <button 
               type="submit" 

@@ -104,7 +104,7 @@ export class AdminTurnosComponent implements OnInit{
 
   constructor(
     private turnoService: TurnoService,
-    private authService: AuthService
+    private authService: AuthService,
   ) {}
 
   ngOnInit() {
@@ -411,22 +411,17 @@ export class AdminTurnosComponent implements OnInit{
     if (!textoBusqueda) return this.turnos;
   
     return this.turnos.filter(turno => {
-      // Búsqueda en campos básicos del turno
       const matchBasico = 
         turno.especialidad.toLowerCase().includes(textoBusqueda) ||
         turno.especialista.toLowerCase().includes(textoBusqueda) ||
         turno.paciente?.toLowerCase().includes(textoBusqueda) ||
         turno.estado.toLowerCase().includes(textoBusqueda);
-  
-      // Búsqueda en historia clínica
+
       const historiaClinica = this.historiasClinicas.find(hc => hc.turnoId === turno.id);
-      
       const matchHistoriaClinica = historiaClinica ? (
-        // Búsqueda en datos generales
         Object.values(historiaClinica.datosGenerales).some(valor => 
           valor.toString().toLowerCase().includes(textoBusqueda)
         ) ||
-        // Búsqueda en datos dinámicos
         historiaClinica.datosDinamicos.some(dato => 
           dato.clave.toLowerCase().includes(textoBusqueda) ||
           dato.valor.toLowerCase().includes(textoBusqueda)
