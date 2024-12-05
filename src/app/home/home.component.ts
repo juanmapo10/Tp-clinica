@@ -20,7 +20,7 @@ import { RECAPTCHA_SETTINGS, RecaptchaModule, RecaptchaSettings } from 'ng-recap
     {
       provide: RECAPTCHA_SETTINGS,
       useValue: {
-        siteKey: '6LeKc3UqAAAAABMGD1bJ5u0ZfPEu3zGS-zlW5bRG',
+        siteKey: '6LfJopIqAAAAAHZgtOdJpXdVgUDw14_RWEnmuwUH',
       } as RecaptchaSettings,
     },
   ],
@@ -352,7 +352,11 @@ export class HomeComponent implements OnInit {
 
   
   toggleFormularioAdmin() {
+    
     this.mostrarFormularioAdmin = !this.mostrarFormularioAdmin;
+    if(this.mostrarFormularioEspecialista ==  true){
+      this.mostrarFormularioEspecialista = !this.mostrarFormularioEspecialista;
+    }
     if (!this.mostrarFormularioAdmin) {
       this.registroAdminForm.reset({ tipo: 'administrador' });
       this.mensajeExito = '';
@@ -363,11 +367,8 @@ export class HomeComponent implements OnInit {
 
   toggleFormularioEspecialista() {
     this.mostrarFormularioEspecialista = !this.mostrarFormularioEspecialista;
-    if (!this.mostrarFormularioEspecialista) {
-      this.registroEspecialistaForm.reset({ tipo: 'especialista' });
-      this.mensajeExito = '';
-      this.mensajeError = '';
-      this.imagenEspecialista = null;
+    if(this.mostrarFormularioAdmin ==  true){
+      this.mostrarFormularioAdmin = !this.mostrarFormularioAdmin;
     }
   }
 
