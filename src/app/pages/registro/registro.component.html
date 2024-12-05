@@ -224,7 +224,28 @@
                 [multiple]="tipoUsuario === 'paciente'"
                 accept="image/*"
               >
+              <div *ngIf="imagenes.length > 0" class="mt-2">
+                <strong>Imágenes seleccionadas:</strong>
+                <div class="d-flex">
+                  <div *ngFor="let imagen of imagenes; let i = index" class="mr-2">
+                    <img 
+                      [src]="imagen | imagenTemporal" 
+                      class="img-thumbnail" 
+                      style="max-width: 100px; max-height: 100px; margin-right: 10px;"
+                    >
+                    <button 
+                      type="button" 
+                      class="btn btn-danger btn-sm" 
+                      (click)="imagenes.splice(i, 1)"
+                    >
+                      Eliminar
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
+
+            
             
             <div class="mb-3">
               <re-captcha 

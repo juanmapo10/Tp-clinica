@@ -9,6 +9,7 @@ import { PasswordStrengthDirective } from '../../directive/password-strength.dir
 import { ImagePreviewDirective } from '../../directive/image-preview.directive';
 import { CustomValidatorDirective } from '../../directive/custom-validator.directive';
 import { RECAPTCHA_SETTINGS, RecaptchaModule, RecaptchaSettings } from 'ng-recaptcha';
+import { ImagenTemporalPipe } from '../../pipes/imagen-temporal.pipe';
 
 
 @Component({
@@ -22,7 +23,8 @@ import { RECAPTCHA_SETTINGS, RecaptchaModule, RecaptchaSettings } from 'ng-recap
     PasswordStrengthDirective,
     ImagePreviewDirective,
     CustomValidatorDirective,
-    RecaptchaModule
+    RecaptchaModule,
+    ImagenTemporalPipe
   ], providers: [
     {
       provide: RECAPTCHA_SETTINGS,
@@ -116,17 +118,32 @@ export class RegistroComponent implements OnInit {
 
 
   onFileSelected(event: any) {
-    const files = event.target.files;
+    const files = event.target.files as FileList;
     if (files) {
-      this.imagenes = Array.from(files);
-      if (this.tipoUsuario === 'paciente' && this.imagenes.length !== 2) {
-        this.mensajeError = 'Debe seleccionar exactamente 2 imágenes para el perfil de paciente';
-        this.imagenes = [];
-      } else if (this.tipoUsuario === 'especialista' && this.imagenes.length !== 1) {
-        this.mensajeError = 'Debe seleccionar exactamente 1 imagen para el perfil de especialista';
-        this.imagenes = [];
-      } else {
-        this.mensajeError = '';
+      // Convert FileList to File array with type assertion
+      const newImages = Array.from(files) as File[];
+      
+      if (this.tipoUsuario === 'paciente') {
+        // Accumulate images up to 2
+        const totalImages = [...this.imagenes, ...newImages];
+        
+        if (totalImages.length <= 2) {
+          this.imagenes = totalImages;
+          this.mensajeError = '';
+        } else {
+          this.mensajeError = 'Máximo 2 imágenes para el perfil de paciente';
+          // Optionally limit to first 2 images
+          this.imagenes = totalImages.slice(0, 2);
+        }
+      } 
+      else if (this.tipoUsuario === 'especialista') {
+        if (newImages.length === 1) {
+          this.imagenes = newImages;
+          this.mensajeError = '';
+        } else {
+          this.mensajeError = 'Debe seleccionar exactamente 1 imagen para el perfil de especialista';
+          this.imagenes = [];
+        }
       }
     }
   }
