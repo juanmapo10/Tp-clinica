@@ -132,6 +132,7 @@ export class AuthService {
           diasDisponibles,
           horariosDisponibles
         });
+        this.logout()
       }
 
     } catch (error) {

@@ -185,7 +185,12 @@ export class RegistroComponent implements OnInit {
         
         this.mensajeExito = 'Registro exitoso';
         setTimeout(() => {
-          this.router.navigate(['/login']);
+          if(userData.tipo == "especialista"){
+            this.router.navigate(['/login']);
+            this.authService.logout();
+          }else{
+          this.router.navigate(['/perfiles-pacientes']);
+          }
         }, 2000);
       } catch (error) {
         this.mensajeError = 'Error en el registro. Por favor, intente nuevamente.';

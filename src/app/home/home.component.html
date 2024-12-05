@@ -4,9 +4,14 @@
       <div class="card mb-4">
         <div class="card-header d-flex justify-content-between align-items-center">
           <h3 class="mb-0">Gestión de Usuarios</h3>
-          <button class="btn btn-primary" (click)="toggleFormulario()">
-            {{mostrarFormulario ? 'Cancelar Registro' : 'Nuevo Administrador'}}
-          </button>
+          <div class="btn-group">
+            <button class="btn btn-primary me-2" (click)="toggleFormularioAdmin()">
+              {{mostrarFormularioAdmin ? 'Cancelar Registro Admin' : 'Nuevo Administrador'}}
+            </button>
+            <button class="btn btn-success" (click)="toggleFormularioEspecialista()">
+              {{mostrarFormularioEspecialista ? 'Cancelar Registro Especialista' : 'Nuevo Especialista'}}
+            </button>
+          </div>
         </div>
         <div class="card-body">
           <div class="table-responsive">
@@ -91,31 +96,28 @@
       </div>
     </div>
 
-    <div *ngIf="mostrarFormulario" class="col-lg-4">
+    <div *ngIf="mostrarFormularioAdmin" class="col-lg-4">
       <div class="card">
         <div class="card-header">
           <h3>Nuevo Administrador</h3>
         </div>
         <div class="card-body">
-          <form [formGroup]="registroForm" (ngSubmit)="onSubmit()">
-            <div class="mb-3">
-              <label class="form-label">Tipo de Usuario</label>
-              <select formControlName="tipo" class="form-control">
-                <option value="administrador">Administrador</option>
-                <option value="especialista">Especialista</option>
-                <option value="paciente">Paciente</option>
-              </select>
-            </div>
-
+          <form [formGroup]="registroAdminForm" (ngSubmit)="onSubmitAdmin()">
             <div class="row">
               <div class="col-md-6 mb-3">
                 <label class="form-label">Nombre</label>
                 <input type="text" formControlName="nombre" class="form-control">
+                <div *ngIf="registroAdminForm.get('nombre')?.invalid && registroAdminForm.get('nombre')?.touched" class="text-danger">
+                  Nombre requerido (mínimo 2 caracteres)
+                </div>
               </div>
 
               <div class="col-md-6 mb-3">
                 <label class="form-label">Apellido</label>
                 <input type="text" formControlName="apellido" class="form-control">
+                <div *ngIf="registroAdminForm.get('apellido')?.invalid && registroAdminForm.get('apellido')?.touched" class="text-danger">
+                  Apellido requerido (mínimo 2 caracteres)
+                </div>
               </div>
             </div>
 
@@ -123,23 +125,37 @@
               <div class="col-md-6 mb-3">
                 <label class="form-label">Edad</label>
                 <input type="number" formControlName="edad" class="form-control">
+                <div *ngIf="registroAdminForm.get('edad')?.invalid && registroAdminForm.get('edad')?.touched" class="text-danger">
+                  Edad debe estar entre 18 y 120
+                </div>
               </div>
 
               <div class="col-md-6 mb-3">
                 <label class="form-label">DNI</label>
                 <input type="text" formControlName="dni" class="form-control">
+                <div *ngIf="registroAdminForm.get('dni')?.invalid && registroAdminForm.get('dni')?.touched" class="text-danger">
+                  DNI debe tener 8 dígitos
+                </div>
               </div>
             </div>
 
             <div class="mb-3">
               <label class="form-label">Email</label>
               <input type="email" formControlName="email" class="form-control">
+              <div *ngIf="registroAdminForm.get('email')?.invalid && registroAdminForm.get('email')?.touched" class="text-danger">
+                Email inválido
+              </div>
             </div>
 
             <div class="mb-3">
               <label class="form-label">Contraseña</label>
               <input type="password" formControlName="password" class="form-control">
+              <div *ngIf="registroAdminForm.get('password')?.invalid && registroAdminForm.get('password')?.touched" class="text-danger">
+                Contraseña requerida (mínimo 6 caracteres)
+              </div>
             </div>
+
+            
 
             <div class="mb-3">
               <label class="form-label">Imagen de Perfil</label>
@@ -149,10 +165,162 @@
                      accept="image/*">
             </div>
 
+            <div class="mb-3">
+              <re-captcha 
+                (resolved)="onRecaptchaResolved($event)"
+                (expired)="onRecaptchaExpired()"
+              ></re-captcha>
+            </div>
+
             <button type="submit" 
                     class="btn btn-primary w-100"
-                    [disabled]="!registroForm.valid || cargando">
-              {{cargando ? 'Registrando...' : 'Registrar Usuario'}}
+                    [disabled]="!registroAdminForm.valid || cargando">
+              {{cargando ? 'Registrando...' : 'Registrar Administrador'}}
+            </button>
+
+            <div *ngIf="mensajeExito" class="alert alert-success mt-3">
+              {{mensajeExito}}
+            </div>
+            <div *ngIf="mensajeError" class="alert alert-danger mt-3">
+              {{mensajeError}}
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="mostrarFormularioEspecialista" class="col-lg-4">
+      <div class="card">
+        <div class="card-header">
+          <h3>Nuevo Especialista</h3>
+        </div>
+        <div class="card-body">
+          <form [formGroup]="registroEspecialistaForm" (ngSubmit)="onSubmitEspecialista()">
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Nombre</label>
+                <input type="text" formControlName="nombre" class="form-control">
+                <div *ngIf="registroEspecialistaForm.get('nombre')?.invalid && registroEspecialistaForm.get('nombre')?.touched" class="text-danger">
+                  Nombre requerido (mínimo 2 caracteres)
+                </div>
+              </div>
+
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Apellido</label>
+                <input type="text" formControlName="apellido" class="form-control">
+                <div *ngIf="registroEspecialistaForm.get('apellido')?.invalid && registroEspecialistaForm.get('apellido')?.touched" class="text-danger">
+                  Apellido requerido (mínimo 2 caracteres)
+                </div>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Edad</label>
+                <input type="number" formControlName="edad" class="form-control">
+                <div *ngIf="registroEspecialistaForm.get('edad')?.invalid && registroEspecialistaForm.get('edad')?.touched" class="text-danger">
+                  Edad debe estar entre 18 y 120
+                </div>
+              </div>
+
+              <div class="col-md-6 mb-3">
+                <label class="form-label">DNI</label>
+                <input type="text" formControlName="dni" class="form-control">
+                <div *ngIf="registroEspecialistaForm.get('dni')?.invalid && registroEspecialistaForm.get('dni')?.touched" class="text-danger">
+                  DNI debe tener 8 dígitos
+                </div>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Email</label>
+              <input type="email" formControlName="email" class="form-control">
+              <div *ngIf="registroEspecialistaForm.get('email')?.invalid && registroEspecialistaForm.get('email')?.touched" class="text-danger">
+                Email inválido
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Contraseña</label>
+              <input type="password" formControlName="password" class="form-control">
+              <div *ngIf="registroEspecialistaForm.get('password')?.invalid && registroEspecialistaForm.get('password')?.touched" class="text-danger">
+                Contraseña requerida (mínimo 6 caracteres)
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Especialidades</label>
+              <div class="form-check" *ngFor="let esp of especialidades$ | async">
+                <input
+                  type="checkbox"
+                  class="form-check-input"
+                  [id]="'esp-' + esp"
+                  [value]="esp"
+                  [checked]="registroEspecialistaForm.get('especialidades')?.value.includes(esp)"
+                  (change)="toggleCheckboxSelection(esp, 'especialidades')"
+                />
+                <label class="form-check-label" [for]="'esp-' + esp">
+                  {{ esp }}
+                </label>
+              </div>
+            </div>
+
+          
+<div>
+          <!-- Días disponibles -->
+          <label class="form-label mt-3">Seleccione los días disponibles</label>
+          <div *ngFor="let dia of diasSemana" class="form-check">
+            <input
+              type="checkbox"
+              class="form-check-input"
+              [id]="'dia-' + dia"
+              [value]="dia"
+              [checked]="registroEspecialistaForm.get('dias')?.value.includes(dia)"
+              (change)="toggleCheckboxSelection(dia, 'dias')"
+            />
+            <label class="form-check-label" [for]="'dia-' + dia">
+              {{ dia }}
+            </label>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Seleccione los horarios disponibles</label>
+          <div *ngFor="let horario of horarios" class="form-check">
+            <input
+              type="checkbox"
+              class="form-check-input"
+              [id]="'horario-' + horario"
+              [value]="horario"
+              [checked]="registroEspecialistaForm.get('horarios')?.value.includes(horario)"
+              (change)="toggleCheckboxSelection(horario, 'horarios')"
+            />
+            <label class="form-check-label" [for]="'horario-' + horario">
+              {{ horario }}
+            </label>
+          </div>
+        </div>
+      
+
+            <div class="mb-3">
+              <label class="form-label">Imagen de Perfil</label>
+              <input type="file" 
+        class="form-control" 
+        (change)="onFileSelected($event, true)"
+        accept="image/*">
+            </div>
+
+            <div class="mb-3">
+              <re-captcha 
+                (resolved)="onRecaptchaResolved($event, true)"
+                (expired)="onRecaptchaExpired(true)"
+              ></re-captcha>
+            </div>
+
+            <button type="submit" 
+                    class="btn btn-primary w-100"
+                    [disabled]="!registroEspecialistaForm.valid || cargandoEspecialista">
+              {{cargandoEspecialista ? 'Registrando...' : 'Registrar Especialista'}}
             </button>
 
             <div *ngIf="mensajeExito" class="alert alert-success mt-3">
@@ -166,7 +334,6 @@
       </div>
     </div>
   </div>
-</div>
 
 <div *ngIf="pacienteSeleccionado" class="modal fade show" tabindex="-1" style="display: block;">
   <div class="modal-dialog modal-lg">

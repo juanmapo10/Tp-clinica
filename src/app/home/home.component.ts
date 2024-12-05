@@ -6,16 +6,24 @@ import { CommonModule } from '@angular/common';
 import { TurnoService,Turno } from '../services/turno.service';
 import * as XLSX from 'xlsx';
 import { trigger, state, style, transition, animate } from '@angular/animations';
-
+import { RECAPTCHA_SETTINGS, RecaptchaModule, RecaptchaSettings } from 'ng-recaptcha';
 
 
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule,],
+  imports: [CommonModule, ReactiveFormsModule,RecaptchaModule],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css',
+  providers: [
+    {
+      provide: RECAPTCHA_SETTINGS,
+      useValue: {
+        siteKey: '6LeKc3UqAAAAABMGD1bJ5u0ZfPEu3zGS-zlW5bRG',
+      } as RecaptchaSettings,
+    },
+  ],
   animations: [
     trigger('slideInOut', [
       state('void', style({
@@ -38,7 +46,6 @@ import { trigger, state, style, transition, animate } from '@angular/animations'
   ]
 })
 export class HomeComponent implements OnInit {
-  registroForm: FormGroup;
   usuarios$: Observable<Usuario[]>;
   imagen: File | null = null;
   cargando = false;
@@ -56,13 +63,27 @@ export class HomeComponent implements OnInit {
   showLoginLogs = false;
   usuarioAEliminar: Usuario | null = null;
 
+  registroAdminForm: FormGroup;
+  registroEspecialistaForm: FormGroup;
+  imagenEspecialista: File | null = null;
+  cargandoEspecialista = false;
+  mostrarFormularioAdmin = false; 
+  mostrarFormularioEspecialista = false;
+  especialidades$: Observable<string[]>;
+  diasSemana = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'];
+  horarios = Array.from({ length: 10 }, (_, i) => `${8 + i}:00`);
+
+
+
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
     private turnoService: TurnoService
   ) {
-    this.registroForm = this.crearFormulario();
+    this.registroAdminForm = this.crearFormularioAdmin();
     this.usuarios$ = this.authService.getUsuarios();
+    this.registroEspecialistaForm = this.crearFormularioEspecialista();
+    this.especialidades$ = this.authService.getEspecialidades();
   }
 
   ngOnInit() {
@@ -71,48 +92,84 @@ export class HomeComponent implements OnInit {
     this.cargarLoginLogs();
   }
 
-  private crearFormulario(): FormGroup {
+  toggleCheckboxSelection(value: string, controlName: string): void {
+    const control = this.registroEspecialistaForm.get(controlName);
+    if (control) {
+      const currentValues = control.value || [];
+      const updatedValues = currentValues.includes(value)
+        ? currentValues.filter((item: string) => item !== value)
+        : [...currentValues, value];
+      
+      control.setValue(updatedValues);
+      control.markAsDirty(); 
+    }
+  }
+
+  private crearFormularioAdmin(): FormGroup {
     return this.fb.group({
-      tipo: ['administrador', Validators.required],
       nombre: ['', [Validators.required, Validators.minLength(2)]],
       apellido: ['', [Validators.required, Validators.minLength(2)]],
       edad: ['', [Validators.required, Validators.min(18), Validators.max(120)]],
       dni: ['', [Validators.required, Validators.pattern('^[0-9]{8}$')]],
       email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(6)]]
+      password: ['', [Validators.required, Validators.minLength(6)]],
+      recaptcha: ['', Validators.required]
     });
   }
 
-  onFileSelected(event: any) {
-    const files = event.target.files;
-    if (files?.length > 0) {
-      this.imagen = files[0];
-    }
+  private crearFormularioEspecialista(): FormGroup {
+    return this.fb.group({
+      nombre: ['', [Validators.required, Validators.minLength(2)]],
+      apellido: ['', [Validators.required, Validators.minLength(2)]],
+      edad: ['', [Validators.required, Validators.min(18), Validators.max(120)]],
+      dni: ['', [Validators.required, Validators.pattern('^[0-9]{8}$')]],
+      email: ['', [Validators.required, Validators.email]],
+      password: ['', [Validators.required, Validators.minLength(6)]],
+      recaptcha: ['', Validators.required],
+      especialidades: [[], Validators.required],
+      dias: [[], Validators.required], 
+      horarios: [[], Validators.required], 
+      cuentaVerificado: false,
+    });
   }
 
-  async onSubmit() {
-    if (this.registroForm.valid && this.imagen) {
+  onFileSelected(event: any, isEspecialista: boolean = false) {
+    const files = event.target.files;
+    if (files?.length > 0) {
+      const selectedFile = files[0];
+      if (isEspecialista) {
+        this.imagenEspecialista = selectedFile;
+        console.log('Specialist image selected:', this.imagenEspecialista);
+      } else {
+        this.imagen = selectedFile;
+        console.log('Admin image selected:', this.imagen);
+      }
+    }
+  }
+  async onSubmitAdmin() {
+    if (this.registroAdminForm.valid && this.imagen) {
       this.cargando = true;
       this.mensajeError = '';
       this.mensajeExito = '';
       
       try {
         const userData = {
-          ...this.registroForm.value,
-          aprobado: this.registroForm.value.tipo === 'administrador'
+          ...this.registroAdminForm.value,
+          aprobado: true,
+          tipo: "admin"
         };
         
         await this.authService.registrarUsuario(
           userData,
-          this.registroForm.get('password')?.value,
+          this.registroAdminForm.get('password')?.value,
           [this.imagen]
         );
         
-        this.mensajeExito = 'Usuario registrado exitosamente';
-        this.registroForm.reset();
+        this.mensajeExito = 'Administrador registrado exitosamente';
+        this.registroAdminForm.reset({ tipo: 'administrador' });
         this.imagen = null;
       } catch (error) {
-        this.mensajeError = 'Error al registrar usuario';
+        this.mensajeError = 'Error al registrar administrador';
       } finally {
         this.cargando = false;
       }
@@ -120,6 +177,49 @@ export class HomeComponent implements OnInit {
       this.mensajeError = 'Por favor complete todos los campos y seleccione una imagen';
     }
   }
+
+  async onSubmitEspecialista() {
+    console.log('Specialist Image:', this.imagenEspecialista);
+    console.log('Form Valid:', this.registroEspecialistaForm.valid);
+    Object.keys(this.registroEspecialistaForm.controls).forEach(key => {
+      const control = this.registroEspecialistaForm.get(key);
+      if (control?.invalid) {
+        console.log(`${key} is invalid:`, control.errors);
+      }
+    });
+    console.log(this.imagenEspecialista)
+    if (this.registroEspecialistaForm.valid && this.imagenEspecialista) {
+      this.cargandoEspecialista = true;
+      this.mensajeError = '';
+      this.mensajeExito = '';
+      
+      try {
+        const userData = {
+          ...this.registroEspecialistaForm.value,
+          aprobado: false,
+          tipo: "especialista"
+        };
+        
+        await this.authService.registrarUsuario(
+          userData,
+          this.registroEspecialistaForm.get('password')?.value,
+          [this.imagenEspecialista]
+        );
+        
+        this.mensajeExito = 'Especialista registrado exitosamente. Pendiente de aprobación.';
+        this.registroEspecialistaForm.reset({ tipo: 'especialista' });
+        this.imagenEspecialista = null;
+      } catch (error) {
+        this.mensajeError = 'Error al registrar especialista';
+      } finally {
+        this.cargandoEspecialista = false;
+      }
+    } else {
+      this.mensajeError = 'Por favor complete todos los campos y seleccione una imagen';
+    }
+  }
+
+  
 
   async toggleAprobacion(usuario: Usuario) {
     try {
@@ -150,15 +250,7 @@ export class HomeComponent implements OnInit {
     });
   }
 
-  toggleFormulario() {
-    this.mostrarFormulario = !this.mostrarFormulario;
-    if (!this.mostrarFormulario) {
-      this.registroForm.reset({ tipo: 'administrador' });
-      this.mensajeExito = '';
-      this.mensajeError = '';
-      this.imagen = null;
-    }
-  }
+
 
   async eliminarUsuario(uid: string): Promise<void> {
     if (confirm('¿Estás seguro de que deseas eliminar este usuario?')) {
@@ -255,6 +347,47 @@ export class HomeComponent implements OnInit {
       } catch (error) {
         this.mensajeError = 'Error al eliminar usuario';
       }
+    }
+  }
+
+  
+  toggleFormularioAdmin() {
+    this.mostrarFormularioAdmin = !this.mostrarFormularioAdmin;
+    if (!this.mostrarFormularioAdmin) {
+      this.registroAdminForm.reset({ tipo: 'administrador' });
+      this.mensajeExito = '';
+      this.mensajeError = '';
+      this.imagen = null;
+    }
+  }
+
+  toggleFormularioEspecialista() {
+    this.mostrarFormularioEspecialista = !this.mostrarFormularioEspecialista;
+    if (!this.mostrarFormularioEspecialista) {
+      this.registroEspecialistaForm.reset({ tipo: 'especialista' });
+      this.mensajeExito = '';
+      this.mensajeError = '';
+      this.imagenEspecialista = null;
+    }
+  }
+
+  onRecaptchaResolved(token: string | null, isEspecialista: boolean = false) {
+    console.log(isEspecialista);
+    
+    if (isEspecialista) {
+      this.registroEspecialistaForm.patchValue({ recaptcha: token });
+      this.registroEspecialistaForm.get('recaptcha')?.markAsTouched();
+    } else {
+      this.registroAdminForm.patchValue({ recaptcha: token });
+      this.registroAdminForm.get('recaptcha')?.markAsTouched();
+    }
+  }
+  
+  onRecaptchaExpired(isEspecialista: boolean = false) {
+    if (isEspecialista) {
+      this.registroEspecialistaForm.patchValue({ recaptcha: null });
+    } else {
+      this.registroAdminForm.patchValue({ recaptcha: null });
     }
   }
 }
